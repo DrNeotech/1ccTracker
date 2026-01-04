@@ -1,4 +1,2 @@
 # 1ccTracker
-A simple web tool for creating shareable images of your Touhou 1CC progress.
-
-Hosted at https://doopu.github.io/1ccTracker/ - it's not the prettiest code ever, but it gets the job done! In major need of a refactor.
+A maintained fork of doopu's original 1cc tracker made using canvas graphics. Features all Touhou games 1-20 with all progress saved in local storage. I'll be adding new games as they release and I'm always open to feature suggestions.
