@@ -453,7 +453,7 @@ const hm = new Game("HM", "rgba(179, 193, 148, 1.0)", "LHN".split(''), [new Char
     new Character("KO"),
     new Character("MA"),
     new Character("KK")]);
-const ulil = new Game("ULIL", "rgba(0, 136, 148, 1.0)", "LHN".split(''), [new Character("R1"),
+let ulil = new Game("ULIL", "rgba(0, 136, 148, 1.0)", "LHN".split(''), [new Character("R1"), 
     new Character("M"),
     new Character("IC"),
     new Character("B"),
@@ -790,6 +790,8 @@ function setupControls() {
     easyCheckbox.addEventListener('change', updateEasyStatus);
     const legendCheckbox = document.getElementById('legendCheckbox');
     legendCheckbox.addEventListener('change', updateLegendStatus);
+    const reisenCheckbox = document.getElementById('reisenCheckbox');
+    reisenCheckbox.addEventListener('change', updateReisenStatus);
     // For the checkboxes, set them to whatever's in the checkboxState map, if available.
     let checkboxValue = getCheckboxFromState('bg');
     if (checkboxValue !== null) {
@@ -811,7 +813,13 @@ function setupControls() {
         showLegend = checkboxValue;
         legendCheckbox.checked = checkboxValue;
     }
+    checkboxValue = getCheckboxFromState('reisen');
+    if (checkboxValue !== null) {
+        showReisen = checkboxValue;
+        reisenCheckbox.checked = checkboxValue;
+    }
 }
+
 function toggleDone() {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
@@ -905,6 +913,8 @@ let transparentPng = true;
 let showFighting = true;
 let showLegend = true;
 let easyMode = false;
+let showReisen = false;
+
 function updateCanvasHeight() {
     let height = 745;
     if (!showFighting && !easyMode) {
@@ -923,7 +933,6 @@ function updateCanvasHeight() {
     if (ctx) {
         ctx.translate(0.5, 0.5);
     }
-    console.log(height);
     drawScreen();
 }
 function updateBgStatus(e) {
@@ -946,6 +955,12 @@ function updateEasyStatus(e) {
     setCheckboxInState('easy', easyMode);
     updateCanvasHeight();
 }
+function updateReisenStatus(e) {
+    showReisen = e.target.checked;
+    setCheckboxInState('reisen', showReisen);
+    drawScreen();
+}
+
 function selectBox(box) {
     selectedBox = box;
     // Enable all the buttons
@@ -1195,6 +1210,10 @@ function drawScreen() {
         if (easyMode) {
             yOffset += boxWidth;
         }
+        ulil.characters = ulil.characters.filter((char) => char.name !== "RS");
+        if (showReisen) {
+            ulil.characters.push(new Character("RS"));
+        }
         drawGame(ulil, 2, yOffset + 38.85 * boxWidth, true);
         drawGame(aocf, lastX + boxWidth, yOffset + 38.85 * boxWidth);
         drawGame(gi, lastX + 2 * boxWidth, yOffset + 38.85 * boxWidth, true);
@@ -1244,6 +1263,6 @@ fontMini.load().then(function () {
         loadState();
         setupControls();
         updateCanvasHeight();
-        drawScreen();
+        drawScreen(); 
     });
 });
