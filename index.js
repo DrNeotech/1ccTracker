@@ -468,7 +468,7 @@ let ulil = new Game("ULIL", "rgba(0, 136, 148, 1.0)", "LHN".split(''), [new Char
     new Character("KA"),
     new Character("SM"),
     new Character("R2")]);
-const aocf = new Game("AOCF", "rgba(201, 143, 255, 1.0)", "LHN".split(''), [new Character("R"),
+const aocf = new Game("AOCF", "rgba(201, 143, 255, 1.0)", "OLHN".split(''), [new Character("R"),
     new Character("M"),
     new Character("N"),
     new Character("MA"),
@@ -488,6 +488,8 @@ const gi = new Game("GI", "rgba(131, 5, 5, 1.0)", "HN".split(''), [new Character
     new Character("YT")]);
 let lastX = 0;
 let lastY = 0;
+
+
 function drawText(text, x, y, align = 'left', font = "16px touhouFont", colour = "black") {
     x -= 0.5; // Dumb hack for Windows
     if (ctx) {
@@ -916,7 +918,7 @@ let easyMode = false;
 let showReisen = false;
 
 function updateCanvasHeight() {
-    let height = 745;
+    let height = 765;
     if (!showFighting && !easyMode) {
         height = 560;
     }
@@ -925,7 +927,7 @@ function updateCanvasHeight() {
         height += 5.5 * boxWidth;
     }
     if (easyMode && showFighting) {
-        height = 750;
+        height = 770;
         height += 7.5 * boxWidth;
     }
     canvas.height = height;
@@ -1214,9 +1216,9 @@ function drawScreen() {
         if (showReisen) {
             ulil.characters.push(new Character("RS"));
         }
-        drawGame(ulil, 2, yOffset + 38.85 * boxWidth, true);
-        drawGame(aocf, lastX + boxWidth, yOffset + 38.85 * boxWidth);
-        drawGame(gi, lastX + 2 * boxWidth, yOffset + 38.85 * boxWidth, true);
+        drawGame(ulil, 2, yOffset + 39.85 * boxWidth, true);
+        drawGame(aocf, lastX + 2 * boxWidth, yOffset + 38.85 * boxWidth, true);
+        drawGame(gi, lastX + 2 * boxWidth, yOffset + 40.85 * boxWidth, true);
     }
     drawHighlight();
 }
