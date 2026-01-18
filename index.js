@@ -4,6 +4,7 @@ const debugDiv = document.getElementById('debug');
 const canvas = document.getElementById('mainCanvas');
 const downloadButton = document.getElementById('download');
 const ctx = canvas.getContext("2d");
+const completion = document.getElementById('completionRate');
 canvas.style.width = "800px";
 canvas.style.height = "640px";
 // Prevent selection of text while interacting with the canvas
@@ -742,6 +743,7 @@ if (ctx) {
                 found = true;
                 selectBox(box);
                 toggleDone();
+                getCompletions();
                 break;
             }
         }
@@ -951,16 +953,19 @@ function updateFightingStatus(e) {
     showFighting = e.target.checked;
     setCheckboxInState('fighting', showFighting);
     updateCanvasHeight();
+    getCompletions();
 }
 function updateEasyStatus(e) {
     easyMode = e.target.checked;
     setCheckboxInState('easy', easyMode);
     updateCanvasHeight();
+    getCompletions();
 }
 function updateReisenStatus(e) {
     showReisen = e.target.checked;
     setCheckboxInState('reisen', showReisen);
     drawScreen();
+    getCompletions();
 }
 
 function selectBox(box) {
@@ -1242,6 +1247,21 @@ function getCheckboxFromState(checkboxName) {
         return null;
     }
 }
+
+async function getCompletions() {
+    var counter = 0;
+
+    var enabledLevels = boxes.map(lvlName => {return lvlName[1];});
+
+    for (let level of state) {
+        if (!enabledLevels.includes(level[0])) {
+            continue;
+        }
+        counter += level[1].done;
+    }
+    completion.innerText = counter + " / " + enabledLevels.length + " completed. (" + (counter / enabledLevels.length * 100).toFixed(2) + "%)";
+}
+
 function setCheckboxInState(checkboxName, checkboxValue) {
     checkboxState.set(checkboxName, checkboxValue);
     window.localStorage.setItem('checkboxState', JSON.stringify(Array.from(checkboxState.entries())));
@@ -1266,5 +1286,6 @@ fontMini.load().then(function () {
         setupControls();
         updateCanvasHeight();
         drawScreen(); 
+        getCompletions();
     });
 });
