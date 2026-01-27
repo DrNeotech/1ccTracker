@@ -4,6 +4,7 @@ const debugDiv = document.getElementById('debug');
 const canvas = document.getElementById('mainCanvas');
 const downloadButton = document.getElementById('download');
 const ctx = canvas.getContext("2d");
+const completionDiv = document.getElementById('completionDiv');
 const completion = document.getElementById('completionRate');
 canvas.style.width = "800px";
 canvas.style.height = "640px";
@@ -743,7 +744,7 @@ if (ctx) {
                 found = true;
                 selectBox(box);
                 toggleDone();
-                getCompletions();
+                setCompletion();
                 break;
             }
         }
@@ -796,6 +797,8 @@ function setupControls() {
     legendCheckbox.addEventListener('change', updateLegendStatus);
     const reisenCheckbox = document.getElementById('reisenCheckbox');
     reisenCheckbox.addEventListener('change', updateReisenStatus);
+    const completionCheckbox = document.getElementById('completionCheckbox');
+    completionCheckbox.addEventListener('change', updateCompletionStatus);
     // For the checkboxes, set them to whatever's in the checkboxState map, if available.
     let checkboxValue = getCheckboxFromState('bg');
     if (checkboxValue !== null) {
@@ -821,6 +824,11 @@ function setupControls() {
     if (checkboxValue !== null) {
         showReisen = checkboxValue;
         reisenCheckbox.checked = checkboxValue;
+    }
+    checkboxValue = getCheckboxFromState('completions');
+    if (checkboxValue !== null) {
+        showCompletions = checkboxValue;
+        completionCheckbox.checked = checkboxValue;
     }
 }
 
@@ -918,6 +926,7 @@ let showFighting = true;
 let showLegend = true;
 let easyMode = false;
 let showReisen = false;
+let showCompletions = false;
 
 function updateCanvasHeight() {
     let height = 765;
@@ -953,19 +962,34 @@ function updateFightingStatus(e) {
     showFighting = e.target.checked;
     setCheckboxInState('fighting', showFighting);
     updateCanvasHeight();
-    getCompletions();
+    setCompletion();
 }
 function updateEasyStatus(e) {
     easyMode = e.target.checked;
     setCheckboxInState('easy', easyMode);
     updateCanvasHeight();
-    getCompletions();
+    setCompletion();
 }
 function updateReisenStatus(e) {
     showReisen = e.target.checked;
     setCheckboxInState('reisen', showReisen);
     drawScreen();
-    getCompletions();
+    setCompletion();
+}
+function updateCompletionStatus(e) {
+    showCompletions = e.target.checked;
+    setCheckboxInState('completions', showCompletions);
+    setCompletion();
+}
+
+async function setCompletion() {
+    if (showCompletions) {
+        completionDiv.style.display = 'block';
+        var {completed, total, percentage} = await getCompletions();
+        completion.innerText = completed + " / " + total + " completed. (" + percentage + "%)";
+    } else {
+        completionDiv.style.display = 'none';
+    }
 }
 
 function selectBox(box) {
@@ -1259,7 +1283,8 @@ async function getCompletions() {
         }
         counter += level[1].done;
     }
-    completion.innerText = counter + " / " + enabledLevels.length + " completed. (" + (counter / enabledLevels.length * 100).toFixed(2) + "%)";
+
+    return {completed: counter, total: enabledLevels.length, percentage: (counter / enabledLevels.length * 100).toFixed(2)};
 }
 
 function setCheckboxInState(checkboxName, checkboxValue) {
@@ -1286,6 +1311,6 @@ fontMini.load().then(function () {
         setupControls();
         updateCanvasHeight();
         drawScreen(); 
-        getCompletions();
+        setCompletion();
     });
 });
