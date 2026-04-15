@@ -30,6 +30,93 @@ let download = function (e) {
     var image = canvas.toDataURL("image/png");
     e.target.href = image;
 };
+
+function downloadAsBanner(originalCanvas) {
+    const output = document.createElement("canvas");
+    output.width = 1500;
+    output.height = 500;
+
+    const ctx = output.getContext("2d");
+
+    // Example layout: 3 horizontal slices rearranged side-by-side
+
+    const sliceWidth = originalCanvas.width / 3;
+    const sliceHeight = originalCanvas.height;
+
+    ctx.fillStyle = '#fefbe9';
+    ctx.fillRect(0, 0, output.width, output.height);
+    
+    // Touhou 1-6
+    ctx.drawImage(
+        originalCanvas,
+        0, 0, 459, 101,
+        0, 0, 459*1.2, 111*1.2
+    );
+
+    // Touhou 7
+    ctx.drawImage(
+        originalCanvas, 
+        7, 145, 112, 108,
+        469*1.2, 0, 112*1.2, 108*1.2 
+    );
+
+    // Touhou 8 (needs to be scaled down bc of the two paths)
+    ctx.drawImage(
+        originalCanvas, 132, 112, 222, 136, 
+        591*1.22, 0, 222*0.88, 136*0.88
+    );
+
+    // Touhou 9
+    ctx.drawImage(
+        originalCanvas, 374, 162, 249, 86, 
+        765*1.22, 17, 249*1.2, 86*1.2
+    );
+
+    // Bonus Mainlines
+    ctx.drawImage(
+        originalCanvas, 468, 10, 182, 119,
+        1250, 17, 182, 119
+    );
+
+    // Touhou 10 to 14
+    ctx.drawImage(
+        originalCanvas, 7, 265, 704, 91,
+        7, 112*1.2, 704*1.2, 91*1.2
+    );
+
+    // Touhou 15, 16
+    ctx.drawImage(
+        originalCanvas, 7, 367, 449, 92, 
+        260*3.35, 111*1.2, 449*1.2, 92*1.2
+    );
+
+    // Touhou 17, 18
+    ctx.drawImage(
+        originalCanvas, 477, 367, 299, 91,
+        1120, 256, 299*1.2, 91*1.2
+    );
+
+    // Touhou 19, 20
+    ctx.drawImage(
+        originalCanvas, 7, 469, 636, 91,
+        720, 366, 636*1.2, 91*1.2
+    );
+
+    ctx.fillStyle = "black";
+    ctx.font = "40px touhouFont";
+    ctx.fillText("1CC CHART", 720, 266, 1000);
+    ctx.fillText("DRNEOTECH.COM/1CCTRACKER", 720, 296, 1000);
+
+    // Extras
+    // ctx.drawImage(
+    //     originalCanvas, 7, 585, 667, 177,
+    //     820, 301, 667, 200
+    // );
+
+    var image = output.toDataURL("image/png");
+    window.open(image, '_blank');
+}
+
 const boxWidth = 17;
 function drawBox(x, y, width = boxWidth, height = boxWidth, lineWidth = 1.0, strokeStyle = 'rgba(128, 128, 128, 1.0)') {
     if (ctx) {
