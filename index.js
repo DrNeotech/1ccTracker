@@ -1323,11 +1323,11 @@ function drawScreen() {
     drawGame(ms, lastX + boxWidth, yOffset);
     drawGame(eosd, lastX + boxWidth, yOffset);
     drawGame(eosd_nc, lastX + boxWidth, yOffset);
-    drawGame(stb, 31.3 * boxWidth, yOffset + 0 * boxWidth, true);
-    drawGame(ds, lastX + 1.99 * boxWidth - 4, yOffset + 0 * boxWidth, true); 
-    drawGame(isc, lastX + 1.77 * boxWidth - 8, yOffset + 0 * boxWidth, true);
-    drawGame(vd, 32.3 * boxWidth, yOffset + 3.7 * boxWidth, true);
-    drawGame(bm, lastX + 2 * boxWidth, yOffset + 3.7 * boxWidth, true);
+    drawGame(stb, 31.7 * boxWidth, yOffset + 0 * boxWidth, true);
+    drawGame(ds, lastX + 2 * boxWidth - 4, yOffset + 0 * boxWidth, true); 
+    drawGame(isc, 31.7 * boxWidth, yOffset + 3.7 * boxWidth, true);
+    drawGame(vd, lastX + 1.6 * boxWidth, yOffset + 3.7 * boxWidth, true);
+    drawGame(bm, lastX + 1.4 * boxWidth, yOffset + 3.7 * boxWidth, true);
     if (easyMode) {
         yOffset += boxWidth;
     }
@@ -1364,10 +1364,10 @@ function drawScreen() {
     }
     if (showFighting) {
         drawExtraHeader(lastX, yOffset + 32.35 * boxWidth);
-        drawGame(iamp, 2, yOffset + 33.85 * boxWidth, true);
-        drawGame(swr, lastX + boxWidth, yOffset + 33.85 * boxWidth);
-        drawGame(hsoku, lastX + boxWidth, yOffset + 33.85 * boxWidth);
-        drawGame(hm, lastX + boxWidth, yOffset + 33.85 * boxWidth);
+        drawGame(iamp, 2, yOffset + 33.71 * boxWidth, true);
+        drawGame(swr, lastX + boxWidth, yOffset + 33.71 * boxWidth);
+        drawGame(hsoku, lastX + boxWidth, yOffset + 33.71 * boxWidth);
+        drawGame(hm, lastX + boxWidth, yOffset + 33.71 * boxWidth);
         if (easyMode) {
             yOffset += boxWidth;
         }
@@ -1375,9 +1375,9 @@ function drawScreen() {
         if (showReisen) {
             ulil.characters.push(new Character("RS", "Reisen"));
         }
-        drawGame(ulil, 2, yOffset + 39.85 * boxWidth, true);
-        drawGame(aocf, lastX + 2 * boxWidth, yOffset + 38.85 * boxWidth, true);
-        drawGame(gi, lastX + 2 * boxWidth, yOffset + 40.85 * boxWidth, true);
+        drawGame(ulil, 2, yOffset + 39.7 * boxWidth, true);
+        drawGame(aocf, lastX + 2 * boxWidth, yOffset + 38.7 * boxWidth, true);
+        drawGame(gi, lastX + 2 * boxWidth, yOffset + 40.7 * boxWidth, true);
     }
     drawHighlight();
 }
