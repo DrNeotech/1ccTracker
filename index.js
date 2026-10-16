@@ -423,6 +423,9 @@ var ms = new Game("MS", "rgba(194, 36, 128, 1.0)", "XLHN".split(''), [
 var eosd = new Game("EOSD", "rgba(255, 51, 18, 1.0)", "XLHN".split(''), [
     new Character("R", "Reimu", ["a", "b"]),
     new Character("M", "Marisa", ["a", "b"])]);
+var eosd_nc = new Game("EOSD(NC)", "rgb(194, 26, 0, 1.0)", "XLHN".split(''), [
+    new Character("R", "Reimu", ["a", "b"]),
+    new Character("M", "Marisa", ["a", "b"])]);
 var stb = new Game("STB", "rgba(99, 44, 0, 1.0)", ["85", "66"], [
     new Character("AY", "Aya")]);
 var ds = new Game("DS", "rgba(10, 34, 119, 1.0)", ["108", "58"], [
@@ -1319,11 +1322,12 @@ function drawScreen() {
     drawGame(lls, lastX + boxWidth, yOffset);
     drawGame(ms, lastX + boxWidth, yOffset);
     drawGame(eosd, lastX + boxWidth, yOffset);
-    drawGame(stb, lastX + 2 * boxWidth - 6, yOffset + 0 * boxWidth, true);
-    drawGame(ds, lastX + 2 * boxWidth - 4, yOffset + 0 * boxWidth, true);
-    drawGame(isc, lastX + 2 * boxWidth - 8, yOffset + 0 * boxWidth, true);
-    drawGame(vd, lastX + 2 * boxWidth, yOffset + 0 * boxWidth, true);
-    drawGame(bm, 27.585 * boxWidth, yOffset + 4 * boxWidth, true);
+    drawGame(eosd_nc, lastX + boxWidth, yOffset);
+    drawGame(stb, 31.3 * boxWidth, yOffset + 0 * boxWidth, true);
+    drawGame(ds, lastX + 1.9 * boxWidth - 4, yOffset + 0 * boxWidth, true);
+    drawGame(isc, lastX + 1.8 * boxWidth - 8, yOffset + 0 * boxWidth, true);
+    drawGame(vd, 32.3 * boxWidth, yOffset + 4 * boxWidth, true);
+    drawGame(bm, lastX + 2 * boxWidth, yOffset + 4 * boxWidth, true);
     if (easyMode) {
         yOffset += boxWidth;
     }
