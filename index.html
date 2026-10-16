@@ -1,169 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta name="title" content="Touhou 1CC Tracker">
-    <meta name="description" content="A tool for tracking your Touhou progress, and generating image files for sharing and display purposes">
-    <meta name="keywords" content="touhou, tracker, 1cc, tool, social">
-    <meta name="robots" content="index, follow">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="language" content="English">
-    <title>Touhou 1CC Tracker</title>
-    <style>
-      @font-face {
-	  font-family: "touhouFont";
-	  src: url("fonts/touhouFont2.ttf");
-      }
-      @font-face {
-	  font-family: "touhouFontMini";
-	  src: url("fonts/touhouFontLittle.ttf");
-      }
-      canvas {
-	  image-rendering: pixelated;
-	  image-rendering: crisp-edges;
-	  font-smooth: never;
-	  -webkit-font-smoothing : none;
-      }
-      #container {
-	  width: 1200px;
-	  height: 640px;
-	  align-content: center;
-      }
-      #container2 {
-	  width: 800px;
-      }
-      .flex {
-	  display: flex;
-	  flex-wrap: nowrap;
-	  gap: 10px;
-      }
-      body {
-	  background-color:  #fefbe9;
-      }
-      div {
-	  color: #183a1d;
-      }
-      * {
-	  box-sizing: border-box;
-	  text-rendering: optimizeLegibility;
-	  -webkit-font-smoothing: antialiased;
-	  -moz-osx-font-smoothing: grayscale;
-	  font-kerning: auto;
-      }
-      html {
-	  font-family: sans-serif;
-	  -webkit-text-size-adjust: 100%;
-      }
-  </style>
+
+<head>
+	<meta name="title" content="Touhou 1CC Tracker">
+	<meta name="description"
+		content="A tool for tracking your Touhou progress, and generating image files for sharing and display purposes">
+	<meta name="keywords" content="touhou, tracker, 1cc, tool, social">
+	<meta name="robots" content="index, follow">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="language" content="English">
+	<title>Touhou 1CC Tracker</title>
+	<style>
+		@font-face {
+			font-family: "touhouFont";
+			src: url("fonts/touhouFont2.ttf");
+		}
+
+		@font-face {
+			font-family: "touhouFontMini";
+			src: url("fonts/touhouFontLittle.ttf");
+		}
+
+		canvas {
+			image-rendering: pixelated;
+			image-rendering: crisp-edges;
+			font-smooth: never;
+			-webkit-font-smoothing: none;
+		}
+
+		#container {
+			width: 1200px;
+			height: 640px;
+			align-content: center;
+		}
+
+		#container2 {
+			width: 800px;
+		}
+
+		.flex {
+			display: flex;
+			flex-wrap: nowrap;
+			gap: 10px;
+		}
+
+		body {
+			background-color: #fefbe9;
+		}
+
+		div {
+			color: #183a1d;
+		}
+
+		* {
+			box-sizing: border-box;
+			text-rendering: optimizeLegibility;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			font-kerning: auto;
+		}
+
+		html {
+			font-family: sans-serif;
+			-webkit-text-size-adjust: 100%;
+		}
+	</style>
 </head>
-  <body>
-    <div style="font-family: 'touhouFont'; font-size: 32px">TOUHOU 1CC TRACKER</div>
-    <div style="font-family: 'touhouFontMini'; font-size: 16px">1.0</div><br/>
-    <hr>
-    <div id="app">
-      <div>
-      </div>
-      <div id="container" class="flex">
-	<div id="parentDiv">
-	  <canvas id="mainCanvas" width="800" height="640">Your browser is too outdated to use Touhou 1CC Generator, please update at your earliest convenience.</canvas>
-	</div>
-	<div id="controls">
-    <div>This is a fork of Doopu's recreation of the 1cc Tracker image for the Touhou Project series. All progress is saved locally. The original repo hasn't been active since Touhou 19 released so this version will be the most up to date one.</div><br/>
-    <div>I'll try to add new features to improve it when I can but if you have any ideas for what to add you can raise an issue on the repo <a href="https://github.com/DrNeotech/1ccTracker" target="_blank">here</a>.</div><br/>
+
+<body>
+	<div style="font-family: 'touhouFont'; font-size: 32px">TOUHOU 1CC TRACKER</div>
+	<div style="font-family: 'touhouFontMini'; font-size: 16px">1.0</div><br />
 	<hr>
-	  <div id="debug">(Double-)Click a square!</div>
-	  <input type="checkbox" id="doneCheckbox" disabled>
-	  <label for="doneCheckbox">Fill with default colour?</label>
-	  <input type="checkbox" id="verticalCheckbox" disabled>
-	  <label for="verticalCheckbox">No Vertical?</label>
-	  <input type="checkbox" id="focusCheckbox" disabled>
-	  <label for="focusCheckbox">No Focus?</label>
-	  <input type="checkbox" id="pacifistCheckbox" disabled>
-	  <label for="pacifistCheckbox">Pacifist?</label>
-	  <input type="checkbox" id="uniqueCheckbox" disabled>
-	  <label for="uniqueCheckbox">Unique limitation?</label>
-	  <br/>
-	  <label for="livesSelect">Starting lives:</label>
-	  <select name="lives" id="livesSelect" disabled>
-	    <option value=""></option>
-	    <option value="0">0</option>
-	    <option value="1">1</option>
-	    <option value="2">2</option>
-	    <option value="3">3</option>
-	    <option value="4">4</option>
-	    <option value="5">5</option>
-	    <option value="6">6</option>
-	    <option value="7">7</option>
-	    <option value="8">8</option>
-	    <option value="9">9</option>
-	  </select>
-	  <br/>
-	  <label for="missesSelect">Misses:</label>
-	  <select name="misses" id="missesSelect" disabled>
-	    <option value=""></option>
-	    <option value="0">0</option>
-	    <option value="1">1</option>
-	    <option value="2">2</option>
-	    <option value="3">3</option>
-	    <option value="4">4</option>
-	    <option value="5">5</option>
-	    <option value="6">6</option>
-	    <option value="7">7</option>
-	    <option value="8">8</option>
-	    <option value="9">9</option>
-	  </select>
-	  <br/>
-	  <label for="bombsSelect">Bombs used:</label>
-	  <select name="bombs" id="bombsSelect" disabled>
-	    <option value=""></option>
-	    <option value="0">0</option>
-	    <option value="1">1</option>
-	    <option value="2">2</option>
-	    <option value="3">3</option>
-	    <option value="4">4</option>
-	    <option value="5">5</option>
-	    <option value="6">6</option>
-	    <option value="7">7</option>
-	    <option value="8">8</option>
-	    <option value="9">9</option>
-	  </select>
-	  <br/>
-	  <input type="color" id="bgColour" value="#FFFFFF" disabled>
-	  <label for="bgColour">Cell fill colour?</label>
-	  <br/>
-	  <input type="color" id="textColour" disabled>
-	  <label for="textColour">Text colour?</label>
-	  <hr>
-	  <div>
-	    <a id="download" download="progress.png" href="">Download</a> your progress as a shareable image!
-	    <div>
-	      <input type="checkbox" id="useBackgroundCheckbox" checked>
-	      <label for="useBackgroundCheckbox">Transparent PNG?</label>
-	      <br/>
-	      <input type="checkbox" id="fightingCheckbox" checked>
-	      <label for="fightingCheckbox">Show extra games?</label>
-	      <br/>
-	      <input type="checkbox" id="easyCheckbox">
-	      <label for="easyCheckbox">Show easy mode?</label>
-	      <br/>
-	      <input type="checkbox" id="legendCheckbox" checked>
-	      <label for="legendCheckbox">Show legend?</label>
-          <br/>
-	      <input type="checkbox" id="reisenCheckbox">
-	      <label for="reisenCheckbox">Show PS4 exclusive Reisen for ULiL?</label>
-		  <br/>
-		  <input type="checkbox" id="completionCheckbox">
-		  <label for="completionCheckbox">Show completion stats on the sidebar.</label>
-	    </div>
-	  </div>
-		<div id="completionDiv">
-			<hr>
-				<p><u>Completion Stats:</u><p>
-				<label id="completionRate"></label>
-			<hr>
+	<div id="app">
+		<div>
 		</div>
+		<div id="container" class="flex">
+			<div id="parentDiv">
+				<canvas id="mainCanvas" width="800" height="640">Your browser is too outdated to use Touhou 1CC
+					Generator, please update at your earliest convenience.</canvas>
+			</div>
+			<div id="controls">
+				<div>This is a fork of Doopu's recreation of the 1cc Tracker image for the Touhou Project series. All
+					progress is saved locally. The original repo hasn't been active since Touhou 19 released so this
+					version will be the most up to date one.</div><br />
+				<div>I'll try to add new features to improve it when I can but if you have any ideas for what to add you
+					can raise an issue on the repo <a href="https://github.com/DrNeotech/1ccTracker"
+						target="_blank">here</a>.</div><br />
+				<hr>
+				<div id="debug">(Double-)Click a square!</div>
+				<input type="checkbox" id="doneCheckbox" disabled>
+				<label for="doneCheckbox">Fill with default colour?</label>
+				<input type="checkbox" id="verticalCheckbox" disabled>
+				<label for="verticalCheckbox">No Vertical?</label>
+				<input type="checkbox" id="focusCheckbox" disabled>
+				<label for="focusCheckbox">No Focus?</label>
+				<input type="checkbox" id="pacifistCheckbox" disabled>
+				<label for="pacifistCheckbox">Pacifist?</label>
+				<input type="checkbox" id="uniqueCheckbox" disabled>
+				<label for="uniqueCheckbox">Unique limitation?</label>
+				<br />
+				<label for="livesSelect">Starting lives:</label>
+				<select name="lives" id="livesSelect" disabled>
+					<option value=""></option>
+					<option value="0">0</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+				</select>
+				<br />
+				<label for="missesSelect">Misses:</label>
+				<select name="misses" id="missesSelect" disabled>
+					<option value=""></option>
+					<option value="0">0</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+				</select>
+				<br />
+				<label for="bombsSelect">Bombs used:</label>
+				<select name="bombs" id="bombsSelect" disabled>
+					<option value=""></option>
+					<option value="0">0</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+				</select>
+				<br />
+				<input type="color" id="bgColour" value="#FFFFFF" disabled>
+				<label for="bgColour">Cell fill colour?</label>
+				<br />
+				<input type="color" id="textColour" disabled>
+				<label for="textColour">Text colour?</label>
+				<hr>
+				<div>
+					<button id="downloadImg" type="button">Download Image</button>
+					|
+					<button id="exportSave" type="button">Export Save File</button>
+					<button id="importSave" type="button">Import Save File</button>
+					<input id="importSaveInput" type="file" accept=".gz,.1cc,application/gzip" hidden>
+					<div>
+						<input type="checkbox" id="useBackgroundCheckbox" checked>
+						<label for="useBackgroundCheckbox">Transparent PNG?</label>
+						<br />
+						<input type="checkbox" id="fightingCheckbox" checked>
+						<label for="fightingCheckbox">Show extra games?</label>
+						<br />
+						<input type="checkbox" id="easyCheckbox">
+						<label for="easyCheckbox">Show easy mode?</label>
+						<br />
+						<input type="checkbox" id="legendCheckbox" checked>
+						<label for="legendCheckbox">Show legend?</label>
+						<br />
+						<input type="checkbox" id="reisenCheckbox">
+						<label for="reisenCheckbox">Show PS4 exclusive Reisen for ULiL?</label>
+						<br />
+						<input type="checkbox" id="completionCheckbox">
+						<label for="completionCheckbox">Show completion stats on the sidebar.</label>
+					</div>
+				</div>
+				<div id="completionDiv">
+					<hr>
+					<p><u>Completion Stats:</u>
+					<p>
+						<label id="completionRate"></label>
+						<hr>
+				</div>
+			</div>
+		</div>
+		<script src="index.js"></script>
 	</div>
-      </div>
-      <script src="index.js"></script>
-    </div>
-  </body>
+</body>
+
 </html>
