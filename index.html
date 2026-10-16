@@ -134,7 +134,11 @@
 	  <label for="textColour">Text colour?</label>
 	  <hr>
 	  <div>
-	    <a id="download" download="progress.png" href="">Download</a> your progress as a shareable image!
+		<button id="downloadImg" type="button">Download Image</button>
+		|
+		<button id="exportSave" type="button">Export Save File</button>
+		<button id="importSave" type="button">Import Save File</button>
+		<input id="importSaveInput" type="file" accept=".gz,.1cc,application/gzip" hidden>
 	    <div>
 	      <input type="checkbox" id="useBackgroundCheckbox" checked>
 	      <label for="useBackgroundCheckbox">Transparent PNG?</label>

@@ -2,9 +2,10 @@
 const appDiv = document.getElementById('app');
 const debugDiv = document.getElementById('debug');
 const canvas = document.getElementById('mainCanvas');
-const downloadButton = document.getElementById('download');
-const yyyyMmDd = new Date().toISOString().split('T')[0];
-downloadButton.download = `progress_${yyyyMmDd}.png`;
+const imageBtn = document.getElementById('downloadImg');
+const saveBtn = document.getElementById('exportSave');
+const importSaveBtn = document.getElementById('importSave');
+const importSaveInput = document.getElementById('importSaveInput');
 const ctx = canvas.getContext("2d");
 const completionDiv = document.getElementById('completionDiv');
 const completion = document.getElementById('completionRate');
@@ -23,15 +24,14 @@ if (ctx) {
     canvas.height = Math.floor(640 * scale);
     ctx.scale(scale, scale);
 }
-let download = function (e) {
-    deselectBox();
-    if (debugDiv) {
-        debugDiv.innerHTML = '(Double-)Click a square!';
-    }
-    drawScreen();
-    var image = canvas.toDataURL("image/png");
-    e.target.href = image;
-};
+
+function downloadImage() {
+    const date = new Date().toISOString().split('T')[0];
+    const link = document.createElement('a');
+    link.download = `progress_${date}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
 
 function downloadAsBanner(originalCanvas) {
     const output = document.createElement("canvas");
@@ -39,8 +39,6 @@ function downloadAsBanner(originalCanvas) {
     output.height = 500;
 
     const ctx = output.getContext("2d");
-
-    // Example layout: 3 horizontal slices rearranged side-by-side
 
     const sliceWidth = originalCanvas.width / 3;
     const sliceHeight = originalCanvas.height;
@@ -835,7 +833,18 @@ function drawGame(game, baseX, baseY, drawDifficulties = false) {
     drawUILine(baseX - 0.5 + (charX * boxWidth), lastY + boxWidth + 0.5, boxWidth - 8, 2);
 }
 if (ctx) {
-    downloadButton.addEventListener('click', download);
+    imageBtn.addEventListener('click', (e) => { downloadImage(e); });
+    saveBtn.addEventListener('click',  async (e) => { await exportSaveFile(e); });
+    importSaveBtn.addEventListener('click', () => importSaveInput.click());
+    importSaveInput.addEventListener('change', async (e) => {
+        try {
+            await importSaveFile(e.target.files[0]);
+        } catch (error) {
+            alert('Could not import save file. Make sure it is a valid .json.gz export.');
+        } finally {
+            e.target.value = '';
+        }
+    });
     canvas.addEventListener('click', function (event) {
         event.preventDefault();
         var ClientRect = canvas.getBoundingClientRect();
@@ -855,9 +864,6 @@ if (ctx) {
         }
         if (!found) {
             deselectBox();
-            if (debugDiv) {
-                debugDiv.innerHTML = '(Double-)Click a square!';
-            }
             drawScreen();
         }
         return false;
@@ -879,18 +885,12 @@ if (ctx) {
         }
         if (!found) {
             deselectBox();
-            if (debugDiv) {
-                debugDiv.innerHTML = '(Double-)Click a square!';
-            }
             drawScreen();
         }
         return false;
     });
     canvas.addEventListener('contextmenu', function (event) {
         deselectBox();
-        if (debugDiv) {
-            debugDiv.innerHTML = '(Double-)Click a square!';
-        }
         drawScreen();
     });
 }
@@ -1173,6 +1173,9 @@ function selectBox(box) {
     }
 }
 function deselectBox() {
+    if (debugDiv) {
+        debugDiv.innerHTML = '(Double-)Click a square!';
+    };
     selectedBox = null;
     // Disable the controls!
     const doneCheckbox = document.getElementById('doneCheckbox');
@@ -1433,6 +1436,57 @@ function loadState() {
         checkboxState = new Map(JSON.parse(window.localStorage.getItem('checkboxState')));
     }
 }
+
+async function exportSaveFile() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        data[key] = localStorage.getItem(key);
+    }
+
+    const jsonString = JSON.stringify(data, null, 2);
+    const encoder = new TextEncoder();
+    const readableStream = new ReadableStream({
+        start(controller) {
+            controller.enqueue(encoder.encode(jsonString));
+            controller.close();
+        }
+    });
+
+    const compressedStream = readableStream.pipeThrough(new CompressionStream('gzip'));
+    const response = new Response(compressedStream);
+    const blob = await response.blob();
+    const date = new Date().toISOString().split('T')[0];
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.href = url;
+    link.download = `progress_${date}.1cc`;
+    link.click();
+    URL.revokeObjectURL(url);
+};
+
+async function importSaveFile(file) {
+    if (!file) {
+        return;
+    }
+
+    const decompressedStream = file.stream().pipeThrough(new DecompressionStream('gzip'));
+    const jsonString = await new Response(decompressedStream).text();
+    const data = JSON.parse(jsonString);
+    if (!data || typeof data !== 'object' || Array.isArray(data) ||
+        Object.values(data).some(value => typeof value !== 'string')) {
+        throw new Error('Invalid save data');
+    }
+
+    localStorage.clear();
+    for (const [key, value] of Object.entries(data)) {
+        localStorage.setItem(key, value);
+    }
+
+    window.location.reload();
+}
+
 const font = new FontFace('touhouFont', 'url(touhouFont2.ttf)');
 const fontMini = new FontFace('touhouFontMini', 'url(touhouFontLittle.ttf)');
 fontMini.load().then(function () {
