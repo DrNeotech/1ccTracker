@@ -1324,10 +1324,10 @@ function drawScreen() {
     drawGame(eosd, lastX + boxWidth, yOffset);
     drawGame(eosd_nc, lastX + boxWidth, yOffset);
     drawGame(stb, 31.3 * boxWidth, yOffset + 0 * boxWidth, true);
-    drawGame(ds, lastX + 1.9 * boxWidth - 4, yOffset + 0 * boxWidth, true);
-    drawGame(isc, lastX + 1.8 * boxWidth - 8, yOffset + 0 * boxWidth, true);
-    drawGame(vd, 32.3 * boxWidth, yOffset + 4 * boxWidth, true);
-    drawGame(bm, lastX + 2 * boxWidth, yOffset + 4 * boxWidth, true);
+    drawGame(ds, lastX + 1.99 * boxWidth - 4, yOffset + 0 * boxWidth, true); 
+    drawGame(isc, lastX + 1.77 * boxWidth - 8, yOffset + 0 * boxWidth, true);
+    drawGame(vd, 32.3 * boxWidth, yOffset + 3.7 * boxWidth, true);
+    drawGame(bm, lastX + 2 * boxWidth, yOffset + 3.7 * boxWidth, true);
     if (easyMode) {
         yOffset += boxWidth;
     }
