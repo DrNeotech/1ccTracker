@@ -1,19 +1,22 @@
 const appDiv: HTMLElement | null = document.getElementById('app');
 const debugDiv: HTMLElement | null = document.getElementById('debug');
 
-const imageBtn = document.getElementById('downloadImg');
-const saveBtn = document.getElementById('exportSave');
-const importSaveBtn = document.getElementById('importSave');
-const importSaveInput = document.getElementById('importSaveInput');
+const date: Date = new Date();
+const timestamp = date.toISOString().split('T')[0];
+
+const imageBtn: HTMLButtonElement = document.getElementById('downloadImg') as HTMLButtonElement;
+const saveBtn: HTMLButtonElement = document.getElementById('exportSave') as HTMLButtonElement;
+const importSaveBtn: HTMLButtonElement = document.getElementById('importSave') as HTMLButtonElement;
+const importSaveInput: HTMLInputElement = document.getElementById('importSaveInput') as HTMLInputElement;
+
+const completionDiv: HTMLElement = document.getElementById('completionDiv') as HTMLElement;
+const completion: HTMLElement = document.getElementById('completionRate') as HTMLElement;
 
 const canvas: HTMLCanvasElement = document.getElementById('mainCanvas') as HTMLCanvasElement;
-
 const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
-
-const completionDiv = document.getElementById('completionDiv');
-const completion = document.getElementById('completionRate');
 canvas.style.width = "800px";
 canvas.style.height = "640px";
+
 // Prevent selection of text while interacting with the canvas
 canvas.onselectstart = function () {
     return false;
@@ -29,15 +32,14 @@ if (ctx) {
 }
 
 function downloadImage() {
-    const date = new Date().toISOString().split('T')[0];
-    const link = document.createElement('a');
-    link.download = `progress_${date}.png`;
+    const link: HTMLAnchorElement = document.createElement('a');
+    link.download = `progress_${timestamp}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
 }
 
 const boxWidth = 17;
-function drawBox(x, y, width = boxWidth, height = boxWidth, lineWidth = 1.0, strokeStyle = 'rgba(128, 128, 128, 1.0)') {
+function drawBox(x: number, y: number, width = boxWidth, height = boxWidth, lineWidth = 1.0, strokeStyle = 'rgba(128, 128, 128, 1.0)') {
     if (ctx) {
         ctx.lineCap = 'butt';
         ctx.lineJoin = 'miter';
@@ -46,7 +48,7 @@ function drawBox(x, y, width = boxWidth, height = boxWidth, lineWidth = 1.0, str
         ctx.strokeRect(x, y, width, height);
     }
 }
-function drawExtraHeader(x, y) {
+function drawExtraHeader(x: number, y: number) {
     if (ctx) {
         ctx.lineCap = 'butt';
         ctx.lineJoin = 'miter';
@@ -59,7 +61,7 @@ function drawExtraHeader(x, y) {
         drawText("EXTRA", 2, y + 8);
     }
 }
-function drawGFWBox(x, y) {
+function drawGFWBox(x: number, y: number) {
     if (ctx) {
         ctx.lineCap = 'butt';
         ctx.lineJoin = 'miter';
@@ -99,7 +101,7 @@ function drawGFWBox(x, y) {
         ctx.stroke();
     }
 }
-function drawLOLKBox(x, y) {
+function drawLOLKBox(x: number, y: number) {
     if (ctx) {
         ctx.lineCap = 'butt';
         ctx.lineJoin = 'miter';
@@ -136,7 +138,7 @@ function drawLOLKBox(x, y) {
         ctx.stroke();
     }
 }
-function drawHSIFSBox(x, y) {
+function drawHSIFSBox(x: number, y: number) {
     if (ctx) {
         ctx.lineCap = 'square';
         ctx.lineJoin = 'miter';
@@ -189,7 +191,7 @@ function drawHSIFSBox(x, y) {
         ctx.stroke();
     }
 }
-function drawTDUMBox(x, y) {
+function drawTDUMBox(x: number, y: number) {
     if (ctx) {
         ctx.lineCap = 'square';
         ctx.lineJoin = 'miter';
@@ -239,7 +241,19 @@ function drawTDUMBox(x, y) {
         ctx.stroke();
     }
 }
-function drawBoxContentsAux(x, y, done, misses, bombs, lives, vertical, focus, pacifist, unique, cellColour, textColour, colour) {
+function drawBoxContentsAux(x: number,
+    y: number,
+    done: boolean,
+    misses: string | null,
+    bombs: string | null,
+    lives: string | null,
+    vertical: boolean,
+    focus: boolean,
+    pacifist: boolean,
+    unique: boolean,
+    cellColour: string,
+    textColour: string,
+    colour: string): void {
     if (ctx) {
         if (done) {
             ctx.fillStyle = colour;
@@ -280,19 +294,35 @@ function drawBoxContentsAux(x, y, done, misses, bombs, lives, vertical, focus, p
         }
     }
 }
-function drawBoxContents(x, y, boxName, colour) {
-    const box = getBoxFromState([new Path2D(), boxName]);
+function drawBoxContents(x: number, y: number, boxName: string, colour: string): void {
+    const box = getBoxFromState([new Path2D(), boxName, null]);
     drawBoxContentsAux(x, y, box.done, box.misses, box.bombs, box.lives, box.vertical, box.focus, box.pacifist, box.unique, box.cellColour, box.textColour, colour);
 }
 class Character {
-    constructor(name, fullName, subcharacters = []) {
+    name: string;
+    fullName: string;
+    subcharacters: string[];
+    constructor(name: string, fullName: string, subcharacters: string[] = []) {
         this.name = name;
         this.fullName = fullName;
         this.subcharacters = subcharacters.slice();
     }
 }
 class BoxObject {
-    constructor(name) {
+    name: string;
+    done: boolean;
+    pacifist: boolean;
+    unique: boolean;
+    focus: boolean;
+    vertical: boolean;
+    textColour: string;
+    cellColour: string;
+
+    lives: string | null;
+    bombs: string | null;
+    misses: string | null;
+
+    constructor(name: string) {
         this.name = name;
         this.textColour = '#000000';
         this.cellColour = '#FFFFFF';
@@ -307,7 +337,11 @@ class BoxObject {
     }
 }
 class Game {
-    constructor(name, colour, difficulties, characters) {
+    name: string;
+    colour: string;
+    difficulties: string[];
+    characters: Character[];
+    constructor(name: string, colour: string, difficulties: string[], characters: Character[]) {
         this.name = name;
         this.colour = colour;
         this.difficulties = difficulties.slice();
@@ -346,7 +380,7 @@ var eosd_nc = new Game("EOSD(NC)", "rgb(194, 26, 0, 1.0)", "XLHN".split(''), [
 var stb = new Game("STB", "rgba(99, 44, 0, 1.0)", ["85", "66"], [
     new Character("AY", "Aya")]);
 var ds = new Game("DS", "rgba(10, 34, 119, 1.0)", ["108", "58"], [
-    new Character("AY", "Aya"), 
+    new Character("AY", "Aya"),
     new Character("HA", "Hatate")]);
 var isc = new Game("ISC", "rgba(99, 44, 0, 1.0)", ["NI", "C"], [
     new Character("SJ", "Seija")]);
@@ -498,7 +532,7 @@ var hm = new Game("HM", "rgba(179, 193, 148, 1.0)", "LHN".split(''), [
     new Character("MA", "Mamizou"),
     new Character("KK", "Kokoro")]);
 let ulil = new Game("ULIL", "rgba(0, 136, 148, 1.0)", "LHN".split(''), [
-    new Character("R1", "Reimu"), 
+    new Character("R1", "Reimu"),
     new Character("M", "Marisa"),
     new Character("IC", "Ichirin"),
     new Character("B", "Byakuren"),
@@ -537,7 +571,7 @@ let lastX = 0;
 let lastY = 0;
 
 
-function drawText(text, x, y, align = 'left', font = "16px touhouFont", colour = "black") {
+function drawText(text: string, x: number, y: number, align: CanvasTextAlign = 'left', font = "16px touhouFont", colour = "black") {
     x -= 0.5; // Dumb hack for Windows
     if (ctx) {
         ctx.font = font;
@@ -546,7 +580,7 @@ function drawText(text, x, y, align = 'left', font = "16px touhouFont", colour =
         ctx.fillText(text, x, y - 1);
     }
 }
-function drawUILine(x, y, drop, width) {
+function drawUILine(x: number, y: number, drop: number, width: number) {
     if (ctx) {
         ctx.beginPath();
         ctx.lineTo(x, y);
@@ -556,7 +590,7 @@ function drawUILine(x, y, drop, width) {
         ctx.stroke();
     }
 }
-function drawDot(colour, x, y, width = 2) {
+function drawDot(colour: string, x: number, y: number, width: number = 2) {
     if (ctx) {
         ctx.beginPath();
         ctx.fillStyle = colour;
@@ -564,8 +598,8 @@ function drawDot(colour, x, y, width = 2) {
         ctx.fill();
     }
 }
-let boxes = [];
-function drawGame(game, baseX, baseY, drawDifficulties = false) {
+let boxes: [Path2D, string, string][] = []; // fix this typing, probably should introduce a new class for it
+function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: boolean = false) {
     // Except for certain games, we can just draw a difficulties-by-subcharacters box grid
     let width = 0;
     // Expand out the subcharacters while we're at it
@@ -752,16 +786,16 @@ function drawGame(game, baseX, baseY, drawDifficulties = false) {
     drawUILine(baseX - 0.5 + (charX * boxWidth), lastY + boxWidth + 0.5, boxWidth - 8, 2);
 }
 if (ctx) {
-    imageBtn.addEventListener('click', (e) => { downloadImage(e); });
-    saveBtn.addEventListener('click',  async (e) => { await exportSaveFile(e); });
+    imageBtn.addEventListener('click', downloadImage);
+    saveBtn.addEventListener('click', async () => { await exportSaveFile; });
     importSaveBtn.addEventListener('click', () => importSaveInput.click());
-    importSaveInput.addEventListener('change', async (e) => {
+    importSaveInput.addEventListener('change', async () => {
         try {
-            await importSaveFile(e.target.files[0]);
+            await importSaveFile(importSaveInput.files?.[0]);
         } catch (error) {
-            alert('Could not import save file. Make sure it is a valid .json.gz export.');
+            alert("Invalid file type. Make sure you're importing either a .1cc or .json.gz file");
         } finally {
-            e.target.value = '';
+            importSaveInput.value = '';
         }
     });
     canvas.addEventListener('click', function (event) {
@@ -813,39 +847,40 @@ if (ctx) {
         drawScreen();
     });
 }
-let selectedBox = null;
+let selectedBox: [Path2D, string, string] | null = null;
 function setupControls() {
-    const doneCheckbox = document.getElementById('doneCheckbox');
+    const doneCheckbox: HTMLInputElement | null = document.getElementById('doneCheckbox') as HTMLInputElement;
     doneCheckbox.addEventListener('change', updateDoneStatus);
-    const pacifistCheckbox = document.getElementById('pacifistCheckbox');
+    const pacifistCheckbox: HTMLInputElement | null = document.getElementById('pacifistCheckbox') as HTMLInputElement;
     pacifistCheckbox.addEventListener('change', updatePacifistStatus);
-    const focusCheckbox = document.getElementById('focusCheckbox');
+    const focusCheckbox: HTMLInputElement | null = document.getElementById('focusCheckbox') as HTMLInputElement;
     focusCheckbox.addEventListener('change', updateFocusStatus);
-    const uniqueCheckbox = document.getElementById('uniqueCheckbox');
+    const uniqueCheckbox: HTMLInputElement | null = document.getElementById('uniqueCheckbox') as HTMLInputElement;
     uniqueCheckbox.addEventListener('change', updateUniqueStatus);
-    const verticalCheckbox = document.getElementById('verticalCheckbox');
+    const verticalCheckbox: HTMLInputElement | null = document.getElementById('verticalCheckbox') as HTMLInputElement;
     verticalCheckbox.addEventListener('change', updateVerticalStatus);
-    const livesSelect = document.getElementById('livesSelect');
+
+    const livesSelect: HTMLSelectElement | null = document.getElementById('livesSelect') as HTMLSelectElement;;
     livesSelect.addEventListener('change', updateLives);
-    const bombsSelect = document.getElementById('bombsSelect');
+    const bombsSelect: HTMLSelectElement | null = document.getElementById('bombsSelect') as HTMLSelectElement;;
     bombsSelect.addEventListener('change', updateBombs);
-    const missesSelect = document.getElementById('missesSelect');
+    const missesSelect: HTMLSelectElement | null = document.getElementById('missesSelect') as HTMLSelectElement;;
     missesSelect.addEventListener('change', updateMisses);
-    const cellColour = document.getElementById('bgColour');
+    const cellColour: HTMLInputElement | null = document.getElementById('bgColour') as HTMLInputElement;;
     cellColour.addEventListener('change', updateCellColour);
-    const textColour = document.getElementById('textColour');
+    const textColour: HTMLInputElement | null = document.getElementById('textColour') as HTMLInputElement;;
     textColour.addEventListener('change', updateTextColour);
-    const bgCheckbox = document.getElementById('useBackgroundCheckbox');
+    const bgCheckbox: HTMLInputElement | null = document.getElementById('useBackgroundCheckbox') as HTMLInputElement;;
     bgCheckbox.addEventListener('change', updateBgStatus);
-    const fightingCheckbox = document.getElementById('fightingCheckbox');
+    const fightingCheckbox: HTMLInputElement | null = document.getElementById('fightingCheckbox') as HTMLInputElement;;
     fightingCheckbox.addEventListener('change', updateFightingStatus);
-    const easyCheckbox = document.getElementById('easyCheckbox');
+    const easyCheckbox: HTMLInputElement | null = document.getElementById('easyCheckbox') as HTMLInputElement;;
     easyCheckbox.addEventListener('change', updateEasyStatus);
-    const legendCheckbox = document.getElementById('legendCheckbox');
+    const legendCheckbox: HTMLInputElement | null = document.getElementById('legendCheckbox') as HTMLInputElement;;
     legendCheckbox.addEventListener('change', updateLegendStatus);
-    const reisenCheckbox = document.getElementById('reisenCheckbox');
+    const reisenCheckbox: HTMLInputElement | null = document.getElementById('reisenCheckbox') as HTMLInputElement;;
     reisenCheckbox.addEventListener('change', updateReisenStatus);
-    const completionCheckbox = document.getElementById('completionCheckbox');
+    const completionCheckbox: HTMLInputElement | null = document.getElementById('completionCheckbox') as HTMLInputElement;;
     completionCheckbox.addEventListener('change', updateCompletionStatus);
     // For the checkboxes, set them to whatever's in the checkboxState map, if available.
     let checkboxValue = getCheckboxFromState('bg');
@@ -889,86 +924,97 @@ function toggleDone() {
         drawScreen();
     }
 }
-function updateCellColour(e) {
+
+function updateCellColour(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.cellColour = e.target.value;
+        currentBox.cellColour = (e.target! as HTMLInputElement).value;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updateTextColour(e) {
+
+function updateTextColour(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.textColour = e.target.value;
+        currentBox.textColour = (e.target! as HTMLInputElement).value;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updateDoneStatus(e) {
+
+function updateDoneStatus(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.done = e.target.checked;
+        currentBox.done = (e.target! as HTMLInputElement).checked;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updateFocusStatus(e) {
+
+function updateFocusStatus(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.focus = e.target.checked;
+        currentBox.focus = (e.target! as HTMLInputElement).checked;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updatePacifistStatus(e) {
+
+function updatePacifistStatus(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.pacifist = e.target.checked;
+        currentBox.pacifist = (e.target! as HTMLInputElement).checked;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updateVerticalStatus(e) {
+
+function updateVerticalStatus(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.vertical = e.target.checked;
+        currentBox.vertical = (e.target! as HTMLInputElement).checked;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updateUniqueStatus(e) {
+
+function updateUniqueStatus(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.unique = e.target.checked;
+        currentBox.unique = (e.target! as HTMLInputElement).checked;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updateLives(e) {
+
+function updateLives(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.lives = e.target.value;
+        currentBox.lives = (e.target! as HTMLSelectElement).value;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updateBombs(e) {
+
+function updateBombs(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.bombs = e.target.value;
+        currentBox.bombs = (e.target! as HTMLSelectElement).value;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
-function updateMisses(e) {
+
+function updateMisses(e: Event) {
     if (selectedBox) {
         let currentBox = getBoxFromState(selectedBox);
-        currentBox.misses = e.target.value;
+        currentBox.misses = (e.target! as HTMLSelectElement).value;
         setBoxInState(currentBox);
         drawScreen();
     }
 }
+
 let transparentPng = true;
 let showFighting = true;
 let showLegend = true;
@@ -996,36 +1042,39 @@ function updateCanvasHeight() {
     }
     drawScreen();
 }
-function updateBgStatus(e) {
-    transparentPng = e.target.checked;
+function updateBgStatus(e: Event) {
+    transparentPng = (e.target! as HTMLInputElement).checked;
     setCheckboxInState('bg', transparentPng);
     drawScreen();
 }
-function updateLegendStatus(e) {
-    showLegend = e.target.checked;
+
+function updateLegendStatus(e: Event) {
+    showLegend = (e.target! as HTMLInputElement).checked;
     setCheckboxInState('legend', showLegend);
     drawScreen();
 }
-function updateFightingStatus(e) {
-    showFighting = e.target.checked;
+
+function updateFightingStatus(e: Event) {
+    showFighting = (e.target! as HTMLInputElement).checked;
     setCheckboxInState('fighting', showFighting);
     updateCanvasHeight();
-    setCompletion();
 }
-function updateEasyStatus(e) {
-    easyMode = e.target.checked;
+
+function updateEasyStatus(e: Event) {
+    easyMode = (e.target! as HTMLInputElement).checked;
     setCheckboxInState('easy', easyMode);
     updateCanvasHeight();
-    setCompletion();
 }
-function updateReisenStatus(e) {
-    showReisen = e.target.checked;
+
+function updateReisenStatus(e: Event) {
+    showReisen = (e.target! as HTMLInputElement).checked;
     setCheckboxInState('reisen', showReisen);
     drawScreen();
     setCompletion();
 }
-function updateCompletionStatus(e) {
-    showCompletions = e.target.checked;
+
+function updateCompletionStatus(e: Event) {
+    showCompletions = (e.target! as HTMLInputElement).checked;
     setCheckboxInState('completions', showCompletions);
     setCompletion();
 }
@@ -1033,36 +1082,39 @@ function updateCompletionStatus(e) {
 async function setCompletion() {
     if (showCompletions) {
         completionDiv.style.display = 'block';
-        var {completed, total, percentage} = await getCompletions();
+        var { completed, total, percentage } = await getCompletions();
         completion.innerText = completed + " / " + total + " completed. (" + percentage + "%)";
     } else {
         completionDiv.style.display = 'none';
     }
 }
 
-function selectBox(box) {
+function selectBox(box: [Path2D, string, string]) {
     selectedBox = box;
     // Enable all the buttons
-    const doneCheckbox = document.getElementById('doneCheckbox');
+    const doneCheckbox: HTMLInputElement | null = document.getElementById('doneCheckbox') as HTMLInputElement;
     doneCheckbox.disabled = false;
-    const verticalCheckbox = document.getElementById('verticalCheckbox');
+    const verticalCheckbox: HTMLInputElement | null = document.getElementById('verticalCheckbox') as HTMLInputElement;
     verticalCheckbox.disabled = false;
-    const pacifistCheckbox = document.getElementById('pacifistCheckbox');
+    const pacifistCheckbox: HTMLInputElement | null = document.getElementById('pacifistCheckbox') as HTMLInputElement;
     pacifistCheckbox.disabled = false;
-    const uniqueCheckbox = document.getElementById('uniqueCheckbox');
+    const uniqueCheckbox: HTMLInputElement | null = document.getElementById('uniqueCheckbox') as HTMLInputElement;
     uniqueCheckbox.disabled = false;
-    const focusCheckbox = document.getElementById('focusCheckbox');
+    const focusCheckbox: HTMLInputElement | null = document.getElementById('focusCheckbox') as HTMLInputElement;
     focusCheckbox.disabled = false;
-    const livesSelect = document.getElementById('livesSelect');
+
+    const livesSelect: HTMLSelectElement | null = document.getElementById('livesSelect') as HTMLSelectElement;
     livesSelect.disabled = false;
-    const missesSelect = document.getElementById('missesSelect');
+    const missesSelect: HTMLSelectElement | null = document.getElementById('missesSelect') as HTMLSelectElement;
     missesSelect.disabled = false;
-    const bombsSelect = document.getElementById('bombsSelect');
+    const bombsSelect: HTMLSelectElement | null = document.getElementById('bombsSelect') as HTMLSelectElement;
     bombsSelect.disabled = false;
-    const cellColour = document.getElementById('bgColour');
+
+    const cellColour: HTMLInputElement | null = document.getElementById('bgColour') as HTMLInputElement;
     cellColour.disabled = false;
-    const textColour = document.getElementById('textColour');
+    const textColour: HTMLInputElement | null = document.getElementById('textColour') as HTMLInputElement;
     textColour.disabled = false;
+
     // Set their state according to the selected box
     const boxObject = getBoxFromState(box);
     doneCheckbox.checked = boxObject.done;
@@ -1074,60 +1126,63 @@ function selectBox(box) {
     textColour.value = boxObject.textColour;
     if (boxObject.lives) {
         livesSelect.value = boxObject.lives;
-    }
-    else {
+    } else {
         livesSelect.value = "";
     }
     if (boxObject.misses) {
         missesSelect.value = boxObject.misses;
-    }
-    else {
+    } else {
         missesSelect.value = "";
     }
     if (boxObject.bombs) {
         bombsSelect.value = boxObject.bombs;
-    }
-    else {
+    } else {
         bombsSelect.value = "";
     }
 }
+
 function deselectBox() {
     if (debugDiv) {
         debugDiv.innerHTML = '(Double-)Click a square!';
     };
     selectedBox = null;
     // Disable the controls!
-    const doneCheckbox = document.getElementById('doneCheckbox');
+    const doneCheckbox: HTMLInputElement | null = document.getElementById('doneCheckbox') as HTMLInputElement;
     doneCheckbox.disabled = true;
     doneCheckbox.checked = false;
-    const focusCheckbox = document.getElementById('focusCheckbox');
+    const focusCheckbox: HTMLInputElement | null = document.getElementById('focusCheckbox') as HTMLInputElement;
     focusCheckbox.disabled = true;
     focusCheckbox.checked = false;
-    const pacifistCheckbox = document.getElementById('pacifistCheckbox');
+    const pacifistCheckbox: HTMLInputElement | null = document.getElementById('pacifistCheckbox') as HTMLInputElement;
     pacifistCheckbox.disabled = true;
     pacifistCheckbox.checked = false;
-    const uniqueCheckbox = document.getElementById('uniqueCheckbox');
+    const uniqueCheckbox: HTMLInputElement | null = document.getElementById('uniqueCheckbox') as HTMLInputElement;
     uniqueCheckbox.disabled = true;
     uniqueCheckbox.checked = false;
-    const verticalCheckbox = document.getElementById('verticalCheckbox');
+    const verticalCheckbox: HTMLInputElement | null = document.getElementById('verticalCheckbox') as HTMLInputElement;
     verticalCheckbox.disabled = true;
     verticalCheckbox.checked = false;
-    const livesSelect = document.getElementById('livesSelect');
+
+    const livesSelect: HTMLSelectElement | null = document.getElementById('livesSelect') as HTMLSelectElement;
     livesSelect.disabled = true;
     livesSelect.value = "";
-    const missesSelect = document.getElementById('missesSelect');
+
+    const missesSelect: HTMLSelectElement | null = document.getElementById('missesSelect') as HTMLSelectElement;
     missesSelect.disabled = true;
     missesSelect.value = "";
-    const bombsSelect = document.getElementById('bombsSelect');
+    const bombsSelect: HTMLSelectElement | null = document.getElementById('bombsSelect') as HTMLSelectElement;
     bombsSelect.disabled = true;
     bombsSelect.value = "";
-    const cellColour = document.getElementById('bgColour');
+
+    const cellColour: HTMLInputElement | null = document.getElementById('bgColour') as HTMLInputElement;
     cellColour.disabled = true;
     cellColour.value = "#ffffff";
-    const textColour = document.getElementById('textColour');
+    const textColour: HTMLInputElement | null = document.getElementById('textColour') as HTMLInputElement;
     textColour.disabled = true;
     textColour.value = "#000000";
 }
+
+
 function drawHighlight() {
     if (selectedBox) {
         if (ctx) {
@@ -1246,7 +1301,7 @@ function drawScreen() {
     drawGame(eosd, lastX + boxWidth, yOffset);
     drawGame(eosd_nc, lastX + boxWidth, yOffset);
     drawGame(stb, 31.7 * boxWidth, yOffset + 0 * boxWidth, true);
-    drawGame(ds, lastX + 2 * boxWidth - 4, yOffset + 0 * boxWidth, true); 
+    drawGame(ds, lastX + 2 * boxWidth - 4, yOffset + 0 * boxWidth, true);
     drawGame(isc, 31.7 * boxWidth, yOffset + 3.7 * boxWidth, true);
     drawGame(vd, lastX + 1.6 * boxWidth, yOffset + 3.7 * boxWidth, true);
     drawGame(bm, lastX + 1.4 * boxWidth, yOffset + 3.7 * boxWidth, true);
@@ -1303,11 +1358,13 @@ function drawScreen() {
     }
     drawHighlight();
 }
-let checkboxState = new Map();
-let state = new Map();
-function getBoxFromState(box) {
+
+let checkboxState: Map<string, boolean> = new Map();
+let state: Map<string, BoxObject> = new Map();
+
+function getBoxFromState(box: [Path2D, string, string | null]): BoxObject {
     if (state.has(box[1])) {
-        return state.get(box[1]);
+        return state.get(box[1])!;
     }
     else {
         let newBox = new BoxObject(box[1]);
@@ -1315,9 +1372,9 @@ function getBoxFromState(box) {
         return newBox;
     }
 }
-function getCheckboxFromState(checkboxName) {
+function getCheckboxFromState(checkboxName: string) {
     if (checkboxState.has(checkboxName)) {
-        return checkboxState.get(checkboxName);
+        return checkboxState.get(checkboxName)!;
     }
     else {
         return null;
@@ -1327,40 +1384,43 @@ function getCheckboxFromState(checkboxName) {
 async function getCompletions() {
     var counter = 0;
 
-    var enabledLevels = boxes.map(lvlName => {return lvlName[1];});
+    var enabledLevels = boxes.map(lvlName => { return lvlName[1]; });
 
     for (let level of state) {
         if (!enabledLevels.includes(level[0])) {
             continue;
         }
-        counter += level[1].done;
+        counter += Number(level[1].done);
     }
 
-    return {completed: counter, total: enabledLevels.length, percentage: (counter / enabledLevels.length * 100).toFixed(2)};
+    return { completed: counter, total: enabledLevels.length, percentage: (counter / enabledLevels.length * 100).toFixed(2) };
 }
 
-function setCheckboxInState(checkboxName, checkboxValue) {
+function setCheckboxInState(checkboxName: string, checkboxValue: boolean) {
     checkboxState.set(checkboxName, checkboxValue);
     window.localStorage.setItem('checkboxState', JSON.stringify(Array.from(checkboxState.entries())));
 }
-function setBoxInState(box) {
+function setBoxInState(box: BoxObject) {
     state.set(box.name, box);
     window.localStorage.setItem('state', JSON.stringify(Array.from(state.entries())));
 }
 function loadState() {
+    
     if (window.localStorage.getItem('state')) {
-        state = new Map(JSON.parse(window.localStorage.getItem('state')));
+        state = new Map(JSON.parse(window.localStorage.getItem('state')!)!);
     }
     if (window.localStorage.getItem('checkboxState')) {
-        checkboxState = new Map(JSON.parse(window.localStorage.getItem('checkboxState')));
+        checkboxState = new Map(JSON.parse(window.localStorage.getItem('checkboxState')!)!);
     }
 }
 
 async function exportSaveFile() {
-    const data = {};
+    const data: Record<string, string | null> = {};
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        data[key] = localStorage.getItem(key);
+        if (key !== null) {
+            data[key] = localStorage.getItem(key);
+        }
     }
 
     const jsonString = JSON.stringify(data, null, 2);
@@ -1375,45 +1435,46 @@ async function exportSaveFile() {
     const compressedStream = readableStream.pipeThrough(new CompressionStream('gzip'));
     const response = new Response(compressedStream);
     const blob = await response.blob();
-    const date = new Date().toISOString().split('T')[0];
+
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
 
     link.href = url;
-    link.download = `progress_${date}.1cc`;
+    link.download = `progress_${timestamp}.1cc`;
     link.click();
     URL.revokeObjectURL(url);
 };
 
-async function importSaveFile(file) {
+async function importSaveFile(file: File | undefined) {
     if (!file) {
         return;
     }
 
     const decompressedStream = file.stream().pipeThrough(new DecompressionStream('gzip'));
     const jsonString = await new Response(decompressedStream).text();
-    const data = JSON.parse(jsonString);
+    const data: unknown = JSON.parse(jsonString);
     if (!data || typeof data !== 'object' || Array.isArray(data) ||
-        Object.values(data).some(value => typeof value !== 'string')) {
+        Object.keys(data).some(key => typeof (data as Record<string, unknown>)[key] !== 'string')) {
         throw new Error('Invalid save data');
     }
 
+    const saveData = data as Record<string, string>;
     localStorage.clear();
-    for (const [key, value] of Object.entries(data)) {
-        localStorage.setItem(key, value);
+    for (const key of Object.keys(saveData)) {
+        localStorage.setItem(key, saveData[key]);
     }
 
     window.location.reload();
 }
 
-const font = new FontFace('touhouFont', 'url(touhouFont2.ttf)');
-const fontMini = new FontFace('touhouFontMini', 'url(touhouFontLittle.ttf)');
+const font = new FontFace('touhouFont', 'url(fonts/touhouFont2.ttf)');
+const fontMini = new FontFace('touhouFontMini', 'url(fonts/touhouFontLittle.ttf)');
 fontMini.load().then(function () {
     font.load().then(function () {
         loadState();
         setupControls();
         updateCanvasHeight();
-        drawScreen(); 
+        drawScreen();
         setCompletion();
     });
 });
