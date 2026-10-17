@@ -17,22 +17,20 @@ const completion: HTMLElement = document.getElementById('completionRate') as HTM
 
 const canvas: HTMLCanvasElement = document.getElementById('mainCanvas') as HTMLCanvasElement;
 const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
+
+const SCALE = 1;
+
 canvas.style.width = "800px";
 canvas.style.height = "640px";
+
+// might not be necessary. last guy didnt seem to think so but just to be safe
+canvas.width = Math.floor(800 * SCALE);
+canvas.height = Math.floor(640 * SCALE);
 
 // Prevent selection of text while interacting with the canvas
 canvas.onselectstart = function () {
     return false;
 };
-var scale = 1;
-if (ctx) {
-    // Keeping for posterity - canvas scaling tech, which
-    // doesn't work across browsers or OSes and certainly
-    // not for our use-case of creating 800x640 images...
-    canvas.width = Math.floor(800 * scale);
-    canvas.height = Math.floor(640 * scale);
-    ctx.scale(scale, scale);
-}
 
 function downloadImage() {
     const link: HTMLAnchorElement = document.createElement('a');
@@ -334,7 +332,6 @@ class BoxObject {
 let lastX = 0;
 let lastY = 0;
 
-
 function drawText(text: string, x: number, y: number, align: CanvasTextAlign = 'left', font = "16px touhouFont", colour = "black") {
     x -= 0.5; // Dumb hack for Windows
     if (ctx) {
@@ -550,6 +547,7 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
     drawUILine(baseX - 0.5 + (charX * boxWidth), lastY + boxWidth + 0.5, boxWidth - 8, 2);
 }
 if (ctx) {
+    ctx.scale(SCALE, SCALE);
     imageBtn.addEventListener('click', downloadImage);
     saveBtn.addEventListener('click', async () => { await exportSaveFile; });
     importSaveBtn.addEventListener('click', () => importSaveInput.click());
@@ -565,8 +563,8 @@ if (ctx) {
     canvas.addEventListener('click', function (event) {
         event.preventDefault();
         var ClientRect = canvas.getBoundingClientRect();
-        const x = Math.round(event.clientX - ClientRect.left) * scale;
-        const y = Math.round(event.clientY - ClientRect.top) * scale;
+        const x = Math.round(event.clientX - ClientRect.left) * SCALE;
+        const y = Math.round(event.clientY - ClientRect.top) * SCALE;
         let found = false;
         for (let box of boxes) {
             if (ctx.isPointInPath(box[0], x, y)) {
@@ -588,8 +586,8 @@ if (ctx) {
     canvas.addEventListener('dblclick', function (event) {
         event.preventDefault();
         var ClientRect = canvas.getBoundingClientRect();
-        const x = Math.round(event.clientX - ClientRect.left) * scale;
-        const y = Math.round(event.clientY - ClientRect.top) * scale;
+        const x = Math.round(event.clientX - ClientRect.left) * SCALE;
+        const y = Math.round(event.clientY - ClientRect.top) * SCALE;
         let found = false;
         for (let box of boxes) {
             if (ctx.isPointInPath(box[0], x, y)) {
@@ -767,7 +765,6 @@ function updateCanvasHeight() {
     drawScreen();
 }
 
-
 async function showCompletion() {
     if (CONFIG.showCompletions.value) {
         completionDiv.style.display = 'block';
@@ -871,7 +868,6 @@ function deselectBox() {
     textColour.value = "#000000";
 }
 
-
 function drawHighlight() {
     if (selectedBox) {
         if (ctx) {
@@ -883,6 +879,7 @@ function drawHighlight() {
         }
     }
 }
+
 function drawLegend() {
     const topLeft = canvas.width - 8 * boxWidth + 2.5;
     const textOffset = topLeft - 0.5;
@@ -968,6 +965,7 @@ function drawLegend() {
         drawText("FONT SIZE 5 PIXELS", textOffset + 5, yOffset + 70);
     }
 }
+
 function drawScreen() {
     boxes = [];
     if (ctx) {
@@ -1061,6 +1059,7 @@ function getBoxFromState(box: [Path2D, string, string | null]): BoxObject {
         return newBox;
     }
 }
+
 function getCheckboxFromState(checkboxName: string) {
     if (checkboxState.has(checkboxName)) {
         return checkboxState.get(checkboxName)!;
