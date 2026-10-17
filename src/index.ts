@@ -758,7 +758,7 @@ function drawLegend() {
         drawBoxContentsAux(topLeft + 5.5 + boxWidth * 6, yOffset + 14, false, "0", "0", "1", true, true, true, true, "#FFFFFF", "#000000", "#FFFFFF");
         drawBox(topLeft + 5.5 + boxWidth * 6, yOffset + 14, boxWidth, boxWidth, 1.0);
         drawText("CREATE YOUR CHART AT:", textOffset + 5, yOffset + 48);
-        drawText("TINYURL.COM/TJ9829WC", textOffset + 5, yOffset + 54);
+        drawText("TINYURL.COM/TOHO1CC", textOffset + 5, yOffset + 54);
         drawText("FONT SIZE 5 PIXELS", textOffset + 5, yOffset + 70);
     }
 }
