@@ -1,3 +1,5 @@
+import { Settings } from "./settings.js";
+
 const appDiv: HTMLElement | null = document.getElementById('app');
 const debugDiv: HTMLElement | null = document.getElementById('debug');
 
@@ -71,7 +73,7 @@ function drawGFWBox(x: number, y: number) {
         ctx.beginPath();
         ctx.lineTo(x, y);
         ctx.lineTo(x + boxWidth * 6, y);
-        const height = easyMode ? 4 : 3;
+        const height = CONFIG.easyMode.value ? 4 : 3;
         ctx.lineTo(x + boxWidth * 6, y + boxWidth * (height - 1));
         ctx.lineTo(x + boxWidth * 7, y + boxWidth * (height - 1));
         ctx.lineTo(x + boxWidth * 7, y + boxWidth * height);
@@ -125,12 +127,12 @@ function drawLOLKBox(x: number, y: number) {
         ctx.lineTo(x + boxWidth * 7, y + boxWidth);
         ctx.lineTo(x + boxWidth * 7, y);
         ctx.lineTo(x + boxWidth * 8, y);
-        if (!easyMode) {
+        if (!CONFIG.easyMode.value) {
             ctx.lineTo(x + boxWidth * 8, y + boxWidth * 4);
             ctx.lineTo(x, y + boxWidth * 4);
             ctx.lineTo(x, y + boxWidth);
         }
-        if (easyMode) {
+        if (CONFIG.easyMode.value) {
             ctx.lineTo(x + boxWidth * 8, y + boxWidth * 5);
             ctx.lineTo(x, y + boxWidth * 5);
             ctx.lineTo(x, y + boxWidth);
@@ -163,7 +165,7 @@ function drawHSIFSBox(x: number, y: number) {
         ctx.lineTo(x + boxWidth * 13, y + boxWidth);
         ctx.lineTo(x + boxWidth * 16, y + boxWidth);
         let height = 4;
-        if (easyMode) {
+        if (CONFIG.easyMode.value) {
             height = 5;
         }
         ctx.lineTo(x + boxWidth * 16, y + boxWidth * height);
@@ -215,7 +217,7 @@ function drawTDUMBox(x: number, y: number) {
         ctx.lineTo(x + boxWidth * 7, y);
         ctx.lineTo(x + boxWidth * 7, y + boxWidth);
         ctx.lineTo(x + boxWidth * 8, y + boxWidth);
-        const height = easyMode ? 5 : 4;
+        const height = CONFIG.easyMode.value ? 5 : 4;
         ctx.lineTo(x + boxWidth * 8, y + boxWidth * height);
         ctx.lineTo(x, y + boxWidth * height);
         ctx.lineTo(x, y);
@@ -618,7 +620,7 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
     }
     // Easy mode toggle need special work
     let difficulties = game.difficulties.slice();
-    if (easyMode) {
+    if (CONFIG.easyMode.value) {
         if (game.name === 'IN') {
             difficulties = ["X", "B-L", "B-H", "B-N", "B-E", "A-L", "A-H", "A-N", "A-E"];
         }
@@ -632,7 +634,7 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
         if (game.name === 'IN') {
             // IN has an A/B split, so do this custom-style.
             difficulties = 'XLHNLHN'.split('');
-            if (easyMode) {
+            if (CONFIG.easyMode.value) {
                 difficulties = 'XLHNELHNE'.split('');
             }
             if (ctx) {
@@ -643,7 +645,7 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
                 ctx.stroke();
                 drawText("B", baseX - 2, baseY + (boxWidth) + 7);
                 let aOffset = 4;
-                if (easyMode) {
+                if (CONFIG.easyMode.value) {
                     aOffset = 5;
                 }
                 ctx.beginPath();
@@ -662,7 +664,7 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
     }
     if (game.name === 'IN') {
         // We screwed with IN to make it render nice, so fix it up again.
-        if (easyMode) {
+        if (CONFIG.easyMode.value) {
             difficulties = ["X", "B-L", "B-H", "B-N", "B-E", "A-L", "A-H", "A-N", "A-E"];
         } else {
             difficulties = ["X", "B-L", "B-H", "B-N", "A-L", "A-H", "A-N"];
@@ -698,7 +700,7 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
             skipBox = skipBox || (game.name === 'TD' && character.endsWith('2') && difficulty === 'X');
             skipBox = skipBox || (game.name === 'UM' && character.endsWith('2') && difficulty === 'X');
             skipDraw = (game.name === 'GFW' && character === 'EX' && difficulty === 'N');
-            if (easyMode) {
+            if (CONFIG.easyMode.value) {
                 skipDraw = skipDraw || (game.name === 'GFW' && character === 'C2' && difficulty === 'E');
             }
             else {
@@ -706,7 +708,7 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
             }
             if (!skipBox) {
                 let yDraw = y;
-                if (game.name === 'GFW' && character === 'EX' && difficulty === 'N' && easyMode) {
+                if (game.name === 'GFW' && character === 'EX' && difficulty === 'N' && CONFIG.easyMode.value) {
                     yDraw += 1;
                 }
                 let box = new Path2D();
@@ -832,7 +834,7 @@ if (ctx) {
                 found = true;
                 selectBox(box);
                 toggleDone();
-                setCompletion();
+                showCompletion();
                 break;
             }
         }
@@ -847,6 +849,16 @@ if (ctx) {
         drawScreen();
     });
 }
+
+const CONFIG = {
+    transparentPng: new Settings("bg", "useBackgroundCheckbox", true),
+    showFighting: new Settings("fighting", "fightingCheckbox", true),
+    easyMode: new Settings("easy", "easyCheckbox", false),
+    showLegend: new Settings("legend", "legendCheckbox", true),
+    showReisen: new Settings("reisen", "reisenCheckbox", false),
+    showCompletions: new Settings("completions", "completionCheckbox", false),
+} satisfies Record<string, Settings>;
+
 let selectedBox: [Path2D, string, string] | null = null;
 function setupControls() {
     const doneCheckbox: HTMLInputElement | null = document.getElementById('doneCheckbox') as HTMLInputElement;
@@ -860,59 +872,16 @@ function setupControls() {
     const verticalCheckbox: HTMLInputElement | null = document.getElementById('verticalCheckbox') as HTMLInputElement;
     verticalCheckbox.addEventListener('change', updateVerticalStatus);
 
-    const livesSelect: HTMLSelectElement | null = document.getElementById('livesSelect') as HTMLSelectElement;;
+    const livesSelect: HTMLSelectElement | null = document.getElementById('livesSelect') as HTMLSelectElement;
     livesSelect.addEventListener('change', updateLives);
-    const bombsSelect: HTMLSelectElement | null = document.getElementById('bombsSelect') as HTMLSelectElement;;
+    const bombsSelect: HTMLSelectElement | null = document.getElementById('bombsSelect') as HTMLSelectElement;
     bombsSelect.addEventListener('change', updateBombs);
-    const missesSelect: HTMLSelectElement | null = document.getElementById('missesSelect') as HTMLSelectElement;;
+    const missesSelect: HTMLSelectElement | null = document.getElementById('missesSelect') as HTMLSelectElement;
     missesSelect.addEventListener('change', updateMisses);
-    const cellColour: HTMLInputElement | null = document.getElementById('bgColour') as HTMLInputElement;;
+    const cellColour: HTMLInputElement | null = document.getElementById('bgColour') as HTMLInputElement;
     cellColour.addEventListener('change', updateCellColour);
-    const textColour: HTMLInputElement | null = document.getElementById('textColour') as HTMLInputElement;;
+    const textColour: HTMLInputElement | null = document.getElementById('textColour') as HTMLInputElement;
     textColour.addEventListener('change', updateTextColour);
-    const bgCheckbox: HTMLInputElement | null = document.getElementById('useBackgroundCheckbox') as HTMLInputElement;;
-    bgCheckbox.addEventListener('change', updateBgStatus);
-    const fightingCheckbox: HTMLInputElement | null = document.getElementById('fightingCheckbox') as HTMLInputElement;;
-    fightingCheckbox.addEventListener('change', updateFightingStatus);
-    const easyCheckbox: HTMLInputElement | null = document.getElementById('easyCheckbox') as HTMLInputElement;;
-    easyCheckbox.addEventListener('change', updateEasyStatus);
-    const legendCheckbox: HTMLInputElement | null = document.getElementById('legendCheckbox') as HTMLInputElement;;
-    legendCheckbox.addEventListener('change', updateLegendStatus);
-    const reisenCheckbox: HTMLInputElement | null = document.getElementById('reisenCheckbox') as HTMLInputElement;;
-    reisenCheckbox.addEventListener('change', updateReisenStatus);
-    const completionCheckbox: HTMLInputElement | null = document.getElementById('completionCheckbox') as HTMLInputElement;;
-    completionCheckbox.addEventListener('change', updateCompletionStatus);
-    // For the checkboxes, set them to whatever's in the checkboxState map, if available.
-    let checkboxValue = getCheckboxFromState('bg');
-    if (checkboxValue !== null) {
-        transparentPng = checkboxValue;
-        bgCheckbox.checked = checkboxValue;
-    }
-    checkboxValue = getCheckboxFromState('fighting');
-    if (checkboxValue !== null) {
-        showFighting = checkboxValue;
-        fightingCheckbox.checked = checkboxValue;
-    }
-    checkboxValue = getCheckboxFromState('easy');
-    if (checkboxValue !== null) {
-        easyMode = checkboxValue;
-        easyCheckbox.checked = checkboxValue;
-    }
-    checkboxValue = getCheckboxFromState('legend');
-    if (checkboxValue !== null) {
-        showLegend = checkboxValue;
-        legendCheckbox.checked = checkboxValue;
-    }
-    checkboxValue = getCheckboxFromState('reisen');
-    if (checkboxValue !== null) {
-        showReisen = checkboxValue;
-        reisenCheckbox.checked = checkboxValue;
-    }
-    checkboxValue = getCheckboxFromState('completions');
-    if (checkboxValue !== null) {
-        showCompletions = checkboxValue;
-        completionCheckbox.checked = checkboxValue;
-    }
 }
 
 function toggleDone() {
@@ -1015,23 +984,16 @@ function updateMisses(e: Event) {
     }
 }
 
-let transparentPng = true;
-let showFighting = true;
-let showLegend = true;
-let easyMode = false;
-let showReisen = false;
-let showCompletions = false;
-
 function updateCanvasHeight() {
     let height = 765;
-    if (!showFighting && !easyMode) {
+    if (!CONFIG.showFighting.value && !CONFIG.easyMode.value) {
         height = 560;
     }
-    if (easyMode && !showFighting) {
+    if (CONFIG.easyMode.value && !CONFIG.showFighting.value) {
         height = 570;
         height += 5.5 * boxWidth;
     }
-    if (easyMode && showFighting) {
+    if (CONFIG.easyMode.value && CONFIG.showFighting.value) {
         height = 770;
         height += 7.5 * boxWidth;
     }
@@ -1042,45 +1004,10 @@ function updateCanvasHeight() {
     }
     drawScreen();
 }
-function updateBgStatus(e: Event) {
-    transparentPng = (e.target! as HTMLInputElement).checked;
-    setCheckboxInState('bg', transparentPng);
-    drawScreen();
-}
 
-function updateLegendStatus(e: Event) {
-    showLegend = (e.target! as HTMLInputElement).checked;
-    setCheckboxInState('legend', showLegend);
-    drawScreen();
-}
 
-function updateFightingStatus(e: Event) {
-    showFighting = (e.target! as HTMLInputElement).checked;
-    setCheckboxInState('fighting', showFighting);
-    updateCanvasHeight();
-}
-
-function updateEasyStatus(e: Event) {
-    easyMode = (e.target! as HTMLInputElement).checked;
-    setCheckboxInState('easy', easyMode);
-    updateCanvasHeight();
-}
-
-function updateReisenStatus(e: Event) {
-    showReisen = (e.target! as HTMLInputElement).checked;
-    setCheckboxInState('reisen', showReisen);
-    drawScreen();
-    setCompletion();
-}
-
-function updateCompletionStatus(e: Event) {
-    showCompletions = (e.target! as HTMLInputElement).checked;
-    setCheckboxInState('completions', showCompletions);
-    setCompletion();
-}
-
-async function setCompletion() {
-    if (showCompletions) {
+async function showCompletion() {
+    if (CONFIG.showCompletions.value) {
         completionDiv.style.display = 'block';
         var { completed, total, percentage } = await getCompletions();
         completion.innerText = completed + " / " + total + " completed. (" + percentage + "%)";
@@ -1283,14 +1210,14 @@ function drawScreen() {
     boxes = [];
     if (ctx) {
         ctx.clearRect(-2, -2, canvas.width + 2, canvas.height + 2);
-        if (!transparentPng) {
+        if (!CONFIG.transparentPng.value) {
             ctx.fillStyle = 'white';
             ctx.fillRect(-2, -2, canvas.width + 2, canvas.height + 2);
         }
     }
     let yOffset = boxWidth;
     drawText("1CC CHART", 2, 6);
-    if (showLegend) {
+    if (CONFIG.showLegend.value) {
         drawLegend();
     }
     drawGame(hrtp, 2, yOffset + boxWidth, true);
@@ -1305,17 +1232,17 @@ function drawScreen() {
     drawGame(isc, 31.7 * boxWidth, yOffset + 3.7 * boxWidth, true);
     drawGame(vd, lastX + 1.6 * boxWidth, yOffset + 3.7 * boxWidth, true);
     drawGame(bm, lastX + 1.4 * boxWidth, yOffset + 3.7 * boxWidth, true);
-    if (easyMode) {
+    if (CONFIG.easyMode.value) {
         yOffset += boxWidth;
     }
     let pcvPofvOffset = 0;
-    if (easyMode) {
+    if (CONFIG.easyMode.value) {
         pcvPofvOffset = 1;
     }
     drawGame(pcb, 2, yOffset + ((pcvPofvOffset + 8) * boxWidth), true);
     drawGame(imp, lastX + 2 * boxWidth, yOffset + 6 * boxWidth, true);
     drawGame(pofv, lastX + 2 * boxWidth, yOffset + ((pcvPofvOffset + 9) * boxWidth), true);
-    if (easyMode) {
+    if (CONFIG.easyMode.value) {
         yOffset += 2 * boxWidth;
     }
     drawGame(mof, 2, yOffset + 15 * boxWidth, true);
@@ -1324,32 +1251,32 @@ function drawScreen() {
     drawGame(gfw, lastX + boxWidth, yOffset + 16 * boxWidth);
     drawGame(td, lastX + 2 * boxWidth, yOffset + 15 * boxWidth, true);
     drawGame(ddc, lastX + boxWidth, yOffset + 15 * boxWidth);
-    if (easyMode) {
+    if (CONFIG.easyMode.value) {
         yOffset += boxWidth;
     }
     drawGame(lolk, 2, yOffset + 21 * boxWidth, true);
     drawGame(hsifs, lastX + 2 * boxWidth, yOffset + 21 * boxWidth, true);
     drawGame(wbawc, lastX + 2 * boxWidth, yOffset + 21 * boxWidth, true);
     drawGame(um, lastX + boxWidth, yOffset + 21 * boxWidth);
-    if (easyMode) {
+    if (CONFIG.easyMode.value) {
         yOffset += boxWidth;
     }
     drawGame(udoalg, 2, yOffset + 28 * boxWidth, true);
     drawGame(fw, lastX + 2 * boxWidth, yOffset + 27 * boxWidth, true);
-    if (easyMode) {
+    if (CONFIG.easyMode.value) {
         yOffset += boxWidth;
     }
-    if (showFighting) {
+    if (CONFIG.showFighting.value) {
         drawExtraHeader(lastX, yOffset + 32.35 * boxWidth);
         drawGame(iamp, 2, yOffset + 33.71 * boxWidth, true);
         drawGame(swr, lastX + boxWidth, yOffset + 33.71 * boxWidth);
         drawGame(hsoku, lastX + boxWidth, yOffset + 33.71 * boxWidth);
         drawGame(hm, lastX + boxWidth, yOffset + 33.71 * boxWidth);
-        if (easyMode) {
+        if (CONFIG.easyMode.value) {
             yOffset += boxWidth;
         }
         ulil.characters = ulil.characters.filter((char) => char.name !== "RS");
-        if (showReisen) {
+        if (CONFIG.showReisen.value) {
             ulil.characters.push(new Character("RS", "Reisen"));
         }
         drawGame(ulil, 2, yOffset + 39.7 * boxWidth, true);
@@ -1400,12 +1327,13 @@ function setCheckboxInState(checkboxName: string, checkboxValue: boolean) {
     checkboxState.set(checkboxName, checkboxValue);
     window.localStorage.setItem('checkboxState', JSON.stringify(Array.from(checkboxState.entries())));
 }
+
 function setBoxInState(box: BoxObject) {
     state.set(box.name, box);
     window.localStorage.setItem('state', JSON.stringify(Array.from(state.entries())));
 }
+
 function loadState() {
-    
     if (window.localStorage.getItem('state')) {
         state = new Map(JSON.parse(window.localStorage.getItem('state')!)!);
     }
@@ -1475,6 +1403,8 @@ fontMini.load().then(function () {
         setupControls();
         updateCanvasHeight();
         drawScreen();
-        setCompletion();
+        showCompletion();
     });
 });
+
+export {drawScreen, updateCanvasHeight, setCheckboxInState, getCheckboxFromState, showCompletion };
