@@ -544,14 +544,11 @@ if (ctx) {
                 found = true;
                 selectBox(box);
                 drawScreen();
-                if (debugDiv) {
-                    debugDiv.innerHTML = `${box[1]} (${box[2]})`;
-                }
                 break;
             }
         }
         if (!found) {
-            deselectBox();
+            selectBox();
             drawScreen();
         }
         return false;
@@ -572,13 +569,13 @@ if (ctx) {
             }
         }
         if (!found) {
-            deselectBox();
+            selectBox();
             drawScreen();
         }
         return false;
     });
     canvas.addEventListener('contextmenu', function (event) {
-        deselectBox();
+        selectBox();
         drawScreen();
     });
 }
@@ -648,21 +645,20 @@ async function showCompletion() {
     }
 }
 
-function selectBox(box: [Path2D, string, string | null]) {
-    selectedBox = box;
-    const boxObject = getBoxFromState(box);
-    for (const control of Object.values(BOX_CONFIG)) {
-        control.setEnabled(true);
-        control.load(boxObject);
+// really should make a box interface this is not good
+function selectBox(box: [Path2D, string, string | null] | null = null) {
+    if (box) {
+        selectedBox = box;
+        debugDiv!.innerHTML = `${box[1]} (${box[2]})`;
+        const boxObject = getBoxFromState(box!);
+        for (const control of Object.values(BOX_CONFIG)) {
+            control.setEnabled(true);
+            control.load(boxObject);
+        }
+    } else {
+        debugDiv!.innerHTML = '(Double-)Click a square!';
+        for (const control of Object.values(BOX_CONFIG)) control.setEnabled(false);
     }
-}
-
-function deselectBox() {
-    if (debugDiv) {
-        debugDiv.innerHTML = '(Double-)Click a square!';
-    };
-    selectedBox = null;
-    for (const control of Object.values(BOX_CONFIG)) control.setEnabled(false);
 }
 
 function drawHighlight() {
