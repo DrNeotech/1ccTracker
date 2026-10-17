@@ -1,5 +1,6 @@
 import { Settings } from "./settings.js";
 import { Game, Character, gameMap } from "./games.js";
+import { BoxSettings, BoxState, BoxProperty } from "./boxes.js";
 
 const appDiv: HTMLElement | null = document.getElementById('app');
 const debugDiv: HTMLElement | null = document.getElementById('debug');
@@ -300,34 +301,6 @@ function drawBoxContents(x: number, y: number, boxName: string, colour: string):
     drawBoxContentsAux(x, y, box.done, box.misses, box.bombs, box.lives, box.vertical, box.focus, box.pacifist, box.unique, box.cellColour, box.textColour, colour);
 }
 
-class BoxObject {
-    name: string;
-    done: boolean;
-    pacifist: boolean;
-    unique: boolean;
-    focus: boolean;
-    vertical: boolean;
-    textColour: string;
-    cellColour: string;
-
-    lives: string | null;
-    bombs: string | null;
-    misses: string | null;
-
-    constructor(name: string) {
-        this.name = name;
-        this.textColour = '#000000';
-        this.cellColour = '#FFFFFF';
-        this.done = false;
-        this.pacifist = false;
-        this.unique = false;
-        this.focus = false;
-        this.vertical = false;
-        this.lives = null;
-        this.bombs = null;
-        this.misses = null;
-    }
-}
 
 let lastX = 0;
 let lastY = 0;
@@ -610,39 +583,28 @@ if (ctx) {
     });
 }
 
+const BOX_CONFIG = {
+    cellColour: new BoxSettings("bgColour", "cellColour"),
+    textColour: new BoxSettings("textColour", "textColour"),
+    done:       new BoxSettings("doneCheckbox", "done"),
+    focus:      new BoxSettings("focusCheckbox", "focus"),
+    pacifist:   new BoxSettings("pacifistCheckbox", "pacifist"),
+    vertical:   new BoxSettings("verticalCheckbox", "vertical"),
+    unique:     new BoxSettings("uniqueCheckbox", "unique"),
+    lives:      new BoxSettings("livesSelect", "lives"),
+    bombs:      new BoxSettings("bombsSelect", "bombs"),
+    misses:     new BoxSettings("missesSelect", "misses"),
+} satisfies Record<string, BoxSettings>
+
 const CONFIG = {
-    transparentPng: new Settings("bg", "useBackgroundCheckbox", true),
-    showFighting: new Settings("fighting", "fightingCheckbox", true),
-    easyMode: new Settings("easy", "easyCheckbox", false),
-    showLegend: new Settings("legend", "legendCheckbox", true),
-    showReisen: new Settings("reisen", "reisenCheckbox", false),
+    transparentPng:  new Settings("bg", "useBackgroundCheckbox", true),
+    showFighting:    new Settings("fighting", "fightingCheckbox", true),
+    easyMode:        new Settings("easy", "easyCheckbox", false),
+    showLegend:      new Settings("legend", "legendCheckbox", true),
+    showReisen:      new Settings("reisen", "reisenCheckbox", false),
     showCompletions: new Settings("completions", "completionCheckbox", false),
 } satisfies Record<string, Settings>;
 
-let selectedBox: [Path2D, string, string] | null = null;
-function setupControls() {
-    const doneCheckbox: HTMLInputElement | null = document.getElementById('doneCheckbox') as HTMLInputElement;
-    doneCheckbox.addEventListener('change', updateDoneStatus);
-    const pacifistCheckbox: HTMLInputElement | null = document.getElementById('pacifistCheckbox') as HTMLInputElement;
-    pacifistCheckbox.addEventListener('change', updatePacifistStatus);
-    const focusCheckbox: HTMLInputElement | null = document.getElementById('focusCheckbox') as HTMLInputElement;
-    focusCheckbox.addEventListener('change', updateFocusStatus);
-    const uniqueCheckbox: HTMLInputElement | null = document.getElementById('uniqueCheckbox') as HTMLInputElement;
-    uniqueCheckbox.addEventListener('change', updateUniqueStatus);
-    const verticalCheckbox: HTMLInputElement | null = document.getElementById('verticalCheckbox') as HTMLInputElement;
-    verticalCheckbox.addEventListener('change', updateVerticalStatus);
-
-    const livesSelect: HTMLSelectElement | null = document.getElementById('livesSelect') as HTMLSelectElement;
-    livesSelect.addEventListener('change', updateLives);
-    const bombsSelect: HTMLSelectElement | null = document.getElementById('bombsSelect') as HTMLSelectElement;
-    bombsSelect.addEventListener('change', updateBombs);
-    const missesSelect: HTMLSelectElement | null = document.getElementById('missesSelect') as HTMLSelectElement;
-    missesSelect.addEventListener('change', updateMisses);
-    const cellColour: HTMLInputElement | null = document.getElementById('bgColour') as HTMLInputElement;
-    cellColour.addEventListener('change', updateCellColour);
-    const textColour: HTMLInputElement | null = document.getElementById('textColour') as HTMLInputElement;
-    textColour.addEventListener('change', updateTextColour);
-}
 
 function toggleDone() {
     if (selectedBox) {
@@ -653,96 +615,7 @@ function toggleDone() {
         drawScreen();
     }
 }
-
-function updateCellColour(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.cellColour = (e.target! as HTMLInputElement).value;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updateTextColour(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.textColour = (e.target! as HTMLInputElement).value;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updateDoneStatus(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.done = (e.target! as HTMLInputElement).checked;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updateFocusStatus(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.focus = (e.target! as HTMLInputElement).checked;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updatePacifistStatus(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.pacifist = (e.target! as HTMLInputElement).checked;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updateVerticalStatus(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.vertical = (e.target! as HTMLInputElement).checked;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updateUniqueStatus(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.unique = (e.target! as HTMLInputElement).checked;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updateLives(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.lives = (e.target! as HTMLSelectElement).value;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updateBombs(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.bombs = (e.target! as HTMLSelectElement).value;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
-
-function updateMisses(e: Event) {
-    if (selectedBox) {
-        let currentBox = getBoxFromState(selectedBox);
-        currentBox.misses = (e.target! as HTMLSelectElement).value;
-        setBoxInState(currentBox);
-        drawScreen();
-    }
-}
+let selectedBox: [Path2D, string, string | null] | null = null;
 
 function updateCanvasHeight() {
     let height = 765;
@@ -775,55 +648,12 @@ async function showCompletion() {
     }
 }
 
-function selectBox(box: [Path2D, string, string]) {
+function selectBox(box: [Path2D, string, string | null]) {
     selectedBox = box;
-    // Enable all the buttons
-    const doneCheckbox: HTMLInputElement | null = document.getElementById('doneCheckbox') as HTMLInputElement;
-    doneCheckbox.disabled = false;
-    const verticalCheckbox: HTMLInputElement | null = document.getElementById('verticalCheckbox') as HTMLInputElement;
-    verticalCheckbox.disabled = false;
-    const pacifistCheckbox: HTMLInputElement | null = document.getElementById('pacifistCheckbox') as HTMLInputElement;
-    pacifistCheckbox.disabled = false;
-    const uniqueCheckbox: HTMLInputElement | null = document.getElementById('uniqueCheckbox') as HTMLInputElement;
-    uniqueCheckbox.disabled = false;
-    const focusCheckbox: HTMLInputElement | null = document.getElementById('focusCheckbox') as HTMLInputElement;
-    focusCheckbox.disabled = false;
-
-    const livesSelect: HTMLSelectElement | null = document.getElementById('livesSelect') as HTMLSelectElement;
-    livesSelect.disabled = false;
-    const missesSelect: HTMLSelectElement | null = document.getElementById('missesSelect') as HTMLSelectElement;
-    missesSelect.disabled = false;
-    const bombsSelect: HTMLSelectElement | null = document.getElementById('bombsSelect') as HTMLSelectElement;
-    bombsSelect.disabled = false;
-
-    const cellColour: HTMLInputElement | null = document.getElementById('bgColour') as HTMLInputElement;
-    cellColour.disabled = false;
-    const textColour: HTMLInputElement | null = document.getElementById('textColour') as HTMLInputElement;
-    textColour.disabled = false;
-
-    // Set their state according to the selected box
     const boxObject = getBoxFromState(box);
-    doneCheckbox.checked = boxObject.done;
-    pacifistCheckbox.checked = boxObject.pacifist;
-    focusCheckbox.checked = boxObject.focus;
-    uniqueCheckbox.checked = boxObject.unique;
-    verticalCheckbox.checked = boxObject.vertical;
-    cellColour.value = boxObject.cellColour;
-    textColour.value = boxObject.textColour;
-    if (boxObject.lives) {
-        livesSelect.value = boxObject.lives;
-    } else {
-        livesSelect.value = "";
-    }
-    if (boxObject.misses) {
-        missesSelect.value = boxObject.misses;
-    } else {
-        missesSelect.value = "";
-    }
-    if (boxObject.bombs) {
-        bombsSelect.value = boxObject.bombs;
-    } else {
-        bombsSelect.value = "";
+    for (const control of Object.values(BOX_CONFIG)) {
+        control.setEnabled(true);
+        control.load(boxObject);
     }
 }
 
@@ -832,40 +662,7 @@ function deselectBox() {
         debugDiv.innerHTML = '(Double-)Click a square!';
     };
     selectedBox = null;
-    // Disable the controls!
-    const doneCheckbox: HTMLInputElement | null = document.getElementById('doneCheckbox') as HTMLInputElement;
-    doneCheckbox.disabled = true;
-    doneCheckbox.checked = false;
-    const focusCheckbox: HTMLInputElement | null = document.getElementById('focusCheckbox') as HTMLInputElement;
-    focusCheckbox.disabled = true;
-    focusCheckbox.checked = false;
-    const pacifistCheckbox: HTMLInputElement | null = document.getElementById('pacifistCheckbox') as HTMLInputElement;
-    pacifistCheckbox.disabled = true;
-    pacifistCheckbox.checked = false;
-    const uniqueCheckbox: HTMLInputElement | null = document.getElementById('uniqueCheckbox') as HTMLInputElement;
-    uniqueCheckbox.disabled = true;
-    uniqueCheckbox.checked = false;
-    const verticalCheckbox: HTMLInputElement | null = document.getElementById('verticalCheckbox') as HTMLInputElement;
-    verticalCheckbox.disabled = true;
-    verticalCheckbox.checked = false;
-
-    const livesSelect: HTMLSelectElement | null = document.getElementById('livesSelect') as HTMLSelectElement;
-    livesSelect.disabled = true;
-    livesSelect.value = "";
-
-    const missesSelect: HTMLSelectElement | null = document.getElementById('missesSelect') as HTMLSelectElement;
-    missesSelect.disabled = true;
-    missesSelect.value = "";
-    const bombsSelect: HTMLSelectElement | null = document.getElementById('bombsSelect') as HTMLSelectElement;
-    bombsSelect.disabled = true;
-    bombsSelect.value = "";
-
-    const cellColour: HTMLInputElement | null = document.getElementById('bgColour') as HTMLInputElement;
-    cellColour.disabled = true;
-    cellColour.value = "#ffffff";
-    const textColour: HTMLInputElement | null = document.getElementById('textColour') as HTMLInputElement;
-    textColour.disabled = true;
-    textColour.value = "#000000";
+    for (const control of Object.values(BOX_CONFIG)) control.setEnabled(false);
 }
 
 function drawHighlight() {
@@ -1047,14 +844,14 @@ function drawScreen() {
 }
 
 let checkboxState: Map<string, boolean> = new Map();
-let state: Map<string, BoxObject> = new Map();
+let state: Map<string, BoxState> = new Map();
 
-function getBoxFromState(box: [Path2D, string, string | null]): BoxObject {
+function getBoxFromState(box: [Path2D, string, string | null]): BoxState {
     if (state.has(box[1])) {
         return state.get(box[1])!;
     }
     else {
-        let newBox = new BoxObject(box[1]);
+        let newBox = new BoxState(box[1]);
         state.set(box[1], newBox);
         return newBox;
     }
@@ -1089,7 +886,7 @@ function setCheckboxInState(checkboxName: string, checkboxValue: boolean) {
     window.localStorage.setItem('checkboxState', JSON.stringify(Array.from(checkboxState.entries())));
 }
 
-function setBoxInState(box: BoxObject) {
+function setBoxInState(box: BoxState) {
     state.set(box.name, box);
     window.localStorage.setItem('state', JSON.stringify(Array.from(state.entries())));
 }
@@ -1161,11 +958,20 @@ const fontMini = new FontFace('touhouFontMini', 'url(fonts/touhouFontLittle.ttf)
 fontMini.load().then(function () {
     font.load().then(function () {
         loadState();
-        setupControls();
         updateCanvasHeight();
         drawScreen();
         showCompletion();
     });
 });
 
-export { drawScreen, updateCanvasHeight, setCheckboxInState, getCheckboxFromState, showCompletion };
+export { 
+    drawScreen, 
+    updateCanvasHeight, 
+    setCheckboxInState, 
+    getCheckboxFromState, 
+    showCompletion, 
+    setBoxInState,
+    getBoxFromState,
+    selectedBox,
+    selectBox
+};
