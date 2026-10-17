@@ -1,4 +1,5 @@
 import { Settings } from "./settings.js";
+import { Game, Character, gameMap } from "./games.js";
 
 const appDiv: HTMLElement | null = document.getElementById('app');
 const debugDiv: HTMLElement | null = document.getElementById('debug');
@@ -300,16 +301,7 @@ function drawBoxContents(x: number, y: number, boxName: string, colour: string):
     const box = getBoxFromState([new Path2D(), boxName, null]);
     drawBoxContentsAux(x, y, box.done, box.misses, box.bombs, box.lives, box.vertical, box.focus, box.pacifist, box.unique, box.cellColour, box.textColour, colour);
 }
-class Character {
-    name: string;
-    fullName: string;
-    subcharacters: string[];
-    constructor(name: string, fullName: string, subcharacters: string[] = []) {
-        this.name = name;
-        this.fullName = fullName;
-        this.subcharacters = subcharacters.slice();
-    }
-}
+
 class BoxObject {
     name: string;
     done: boolean;
@@ -338,237 +330,7 @@ class BoxObject {
         this.misses = null;
     }
 }
-class Game {
-    name: string;
-    colour: string;
-    difficulties: string[];
-    characters: Character[];
-    constructor(name: string, colour: string, difficulties: string[], characters: Character[]) {
-        this.name = name;
-        this.colour = colour;
-        this.difficulties = difficulties.slice();
-        this.characters = characters.slice();
-    }
-}
 
-var hrtp = new Game("HRTP", "rgba(210, 60, 255, 1.0)", "LHN".split(''), [
-    new Character("", "Reimu", ["ma", "j"])]);
-var soew = new Game("SOEW", "rgba(32, 51, 255, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b", "c"])]);
-var podd = new Game("PODD", "rgba(255, 92, 92, 1.0)", "LHN".split(''), [
-    new Character("R", "Reimu"),
-    new Character("MI", "Mima"),
-    new Character("M", "Marisa"),
-    new Character("EL", "Ellen"),
-    new Character("KH", "Kotohime"),
-    new Character("KA", "Kana"),
-    new Character("RI", "Rikako"),
-    new Character("CH", "Chiyuri"),
-    new Character("YM", "Yumemi")]);
-var lls = new Game("LLS", "rgba(73, 250, 76, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b"]),
-    new Character("M", "Marisa", ["a", "b"])]);
-var ms = new Game("MS", "rgba(194, 36, 128, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu"),
-    new Character("M", "Marisa"),
-    new Character("MI", "Mima"),
-    new Character("YK", "Yuuka")]);
-var eosd = new Game("EOSD", "rgba(255, 51, 18, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b"]),
-    new Character("M", "Marisa", ["a", "b"])]);
-var eosd_nc = new Game("EOSD(NC)", "rgb(194, 26, 0, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b"]),
-    new Character("M", "Marisa", ["a", "b"])]);
-var stb = new Game("STB", "rgba(99, 44, 0, 1.0)", ["85", "66"], [
-    new Character("AY", "Aya")]);
-var ds = new Game("DS", "rgba(10, 34, 119, 1.0)", ["108", "58"], [
-    new Character("AY", "Aya"),
-    new Character("HA", "Hatate")]);
-var isc = new Game("ISC", "rgba(99, 44, 0, 1.0)", ["NI", "C"], [
-    new Character("SJ", "Seija")]);
-var vd = new Game("VD", "rgba(163, 73, 164, 1.0)", ["103", "C"], [
-    new Character("SM", "Sumireko")]);
-var bm = new Game("100BM", "rgba(232, 125, 0, 1.0)", ["85", "C"], [
-    new Character("M", "Marisa")]);
-var pcb = new Game("PCB", "rgba(255, 127, 191, 1.0)", "PXLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b"]),
-    new Character("M", "Marisa", ["a", "b"]),
-    new Character("S", "Sakuya", ["a", "b"])]);
-var imp = new Game("IN", "rgba(196, 101, 0, 1.0)", ["X", "B-L", "B-H", "B-N", "A-L", "A-H", "A-N"], [
-    new Character("BT", "Border Team"),
-    new Character("MT", "Magic Team"),
-    new Character("ST", "Scarlet Team"),
-    new Character("NT", "Netherworld Team"),
-    new Character("R", "Reimu"),
-    new Character("YU", "Yukari"),
-    new Character("M", "Marisa"),
-    new Character("A", "Alice"),
-    new Character("S", "Sakuya"),
-    new Character("RE", "Remelia"),
-    new Character("Y", "Yuyuko"),
-    new Character("YY", "Youmu")]);
-var pofv = new Game("POFV", "rgba(16, 15, 107, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu"),
-    new Character("M", "Marisa"),
-    new Character("S", "Sakuya"),
-    new Character("Y", "Youmu"),
-    new Character("RS", "Reisen"),
-    new Character("C", "Cirno"),
-    new Character("L", "Lunasa"),
-    new Character("MY", "Mystia"),
-    new Character("T", "Tewi"),
-    new Character("AY", "Aya"),
-    new Character("ME", "Medicine"),
-    new Character("YK", "Yuuka"),
-    new Character("K", "Komachi"),
-    new Character("E", "Eiki")]);
-var mof = new Game("MOF", "rgba(255, 168, 0, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b", "c"]),
-    new Character("M", "Marisa", ["a", "b", "c"])]);
-var sa = new Game("SA", "rgba(0, 201, 109, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b", "c"]),
-    new Character("M", "Marisa", ["a", "b", "c"])]);
-var ufo = new Game("UFO", "rgba(127, 191, 255, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b"]),
-    new Character("M", "Marisa", ["a", "b"]),
-    new Character("SN", "Sanae", ["a", "b"])]);
-var gfw = new Game("GFW", "rgba(127, 253, 255, 1.0)", "LHN".split(''), [
-    new Character("A1", "Route A-1"),
-    new Character("A2", "Route A-2"),
-    new Character("B1", "Route B-1"),
-    new Character("B2", "Route B-2"),
-    new Character("C1", "Route C-1"),
-    new Character("C2", "Route C-2"),
-    new Character("EX", "Extra Route")]);
-var td = new Game("TD", "rgba(255, 191, 127, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["e1", "e2"]),
-    new Character("M", "Marisa", ["e1", "e2"]),
-    new Character("SN", "Sanae", ["e1", "e2"]),
-    new Character("Y", "Youmu", ["e1", "e2"])]);
-var ddc = new Game("DDC", "rgba(123, 95, 135, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["a", "b"]),
-    new Character("M", "Marisa", ["a", "b"]),
-    new Character("S", "Sakuya", ["a", "b"])]);
-var lolk = new Game("LOLK", "rgba(159, 21, 41, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["p", "l"]),
-    new Character("M", "Marisa", ["p", "l"]),
-    new Character("SN", "Sanae", ["p", "l"]),
-    new Character("RS", "Reisen", ["p", "l"])]);
-var hsifs = new Game("HSIFS", "rgba(255, 127, 39, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["sp", "sm", "f", "w"]),
-    new Character("C", "Cirno", ["sp", "sm", "f", "w"]),
-    new Character("AY", "Aya", ["sp", "sm", "f", "w"]),
-    new Character("M", "Marisa", ["sp", "sm", "f", "w"])]);
-var wbawc = new Game("WBAWC", "rgba(224, 66, 44, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["w", "o", "e"]),
-    new Character("M", "Marisa", ["w", "o", "e"]),
-    new Character("Y", "Youmu", ["w", "o", "e"])]);
-var um = new Game("UM", "rgba(0, 201, 109, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["e1", "e2"]),
-    new Character("M", "Marisa", ["e1", "e2"]),
-    new Character("S", "Sakuya", ["e1", "e2"]),
-    new Character("SN", "Sanae", ["e1", "e2"])]);
-var udoalg = new Game("UDOALG", "rgba(74, 124, 71, 1.0)", "LHN".split(''), [
-    new Character("R", "Reimu"),
-    new Character("M", "Marisa"),
-    new Character("SN", "Sanae"),
-    new Character("RA", "Ran"),
-    new Character("A", "Aunn"),
-    new Character("N", "Nazrin"),
-    new Character("SR", "Seiran"),
-    new Character("RI", "Rin"),
-    new Character("TS", "Tsukasa"),
-    new Character("MM", "Mamizou"),
-    new Character("YC", "Yachie"),
-    new Character("SK", "Saki"),
-    new Character("YT", "Yuuma"),
-    new Character("SU", "Suika"),
-    new Character("BS", "Son Biten"),
-    new Character("EN", "Enoko"),
-    new Character("CY", "Chiyari"),
-    new Character("H", "Hisami"),
-    new Character("Z", "Zanmu")]);
-var fw = new Game("FW", "rgba(90, 133, 250, 1.0)", "XLHN".split(''), [
-    new Character("R", "Reimu", ["sd", "cr", "sb", "bs", "ys", "im", "bh", "sw"]),
-    new Character("M", "Marisa", ["sd", "cr", "sb", "bs", "ys", "im", "bh", "sw"])]);
-var iamp = new Game("IAMP", "rgba(78, 22, 86, 1.0)", "LHN".split(''), [
-    new Character("R", "Reimu"),
-    new Character("M", "Marisa"),
-    new Character("S", "Sakuya"),
-    new Character("A", "Alice"),
-    new Character("P", "Patchouli"),
-    new Character("Y", "Youmu"),
-    new Character("RE", "Remelia"),
-    new Character("YY", "Yuyuko"),
-    new Character("YU", "Yukari"),
-    new Character("SU", "Suika")]);
-var swr = new Game("SWR", "rgba(255, 51, 18, 1.0)", "LHN".split(''), [
-    new Character("R", "Reimu"),
-    new Character("M", "Marisa"),
-    new Character("S", "Sakuya"),
-    new Character("A", "Alice"),
-    new Character("P", "Patchouli"),
-    new Character("Y", "Youmu"),
-    new Character("RE", "Remelia"),
-    new Character("YY", "Yuyuko"),
-    new Character("YU", "Yukari"),
-    new Character("SU", "Suika"),
-    new Character("RS", "Reisen"),
-    new Character("AY", "Aya"),
-    new Character("K", "Komachi"),
-    new Character("I", "Iku"),
-    new Character("TE", "Tenshi")]);
-var hsoku = new Game("H.SOKU", "rgba(210, 210, 210, 1.0)", "LHN".split(''), [
-    new Character("SN", "Sanae"),
-    new Character("C", "Cirno"),
-    new Character("ML", "Meiling")]);
-var hm = new Game("HM", "rgba(179, 193, 148, 1.0)", "LHN".split(''), [
-    new Character("R", "Reimu"),
-    new Character("M", "Marisa"),
-    new Character("IC", "Ichirin"),
-    new Character("B", "Byakuren"),
-    new Character("F", "Futo"),
-    new Character("TO", "Toyosatomimi"),
-    new Character("N", "Nitori"),
-    new Character("KO", "Koishi"),
-    new Character("MA", "Mamizou"),
-    new Character("KK", "Kokoro")]);
-let ulil = new Game("ULIL", "rgba(0, 136, 148, 1.0)", "LHN".split(''), [
-    new Character("R1", "Reimu"),
-    new Character("M", "Marisa"),
-    new Character("IC", "Ichirin"),
-    new Character("B", "Byakuren"),
-    new Character("F", "Futo"),
-    new Character("TO", "Toyosatomimi"),
-    new Character("N", "Nitori"),
-    new Character("KO", "Koishi"),
-    new Character("MA", "Mamizou"),
-    new Character("KK", "Kokoro"),
-    new Character("MO", "Mokou"),
-    new Character("SH", "Shinmyoumaru"),
-    new Character("KA", "Kasen"),
-    new Character("SM", "Sumireko"),
-    new Character("R2", "Reimu Ending")]);
-var aocf = new Game("AOCF", "rgba(201, 143, 255, 1.0)", "OLHN".split(''), [
-    new Character("R", "Reimu & Kasen"),
-    new Character("M", "Marisa & Koishi"),
-    new Character("N", "Nitori & Kokoro"),
-    new Character("MA", "Mamizou & Mokou"),
-    new Character("TO", "Miko & Byakuren"),
-    new Character("F", "Futo & Ichirin"),
-    new Character("RS", "Reisen & Doremy"),
-    new Character("SM", "Sumireko & Doremy"),
-    new Character("TE", "Tenshi & Shinmyoumaru"),
-    new Character("YU", "Yukari & Reimu"),
-    new Character("J", "Joon & Shion")]);
-var gi = new Game("GI", "rgba(131, 5, 5, 1.0)", "HN".split(''), [
-    new Character("R", "Reimu"),
-    new Character("M", "Marisa"),
-    new Character("KA", "Kanako"),
-    new Character("MU", "Murasa"),
-    new Character("J", "Joon"),
-    new Character("FL", "Flandre", ["a", "b", "c"]),
-    new Character("YT", "Yuuma")]);
 let lastX = 0;
 let lastY = 0;
 
@@ -1220,18 +982,18 @@ function drawScreen() {
     if (CONFIG.showLegend.value) {
         drawLegend();
     }
-    drawGame(hrtp, 2, yOffset + boxWidth, true);
-    drawGame(soew, lastX + boxWidth, yOffset);
-    drawGame(podd, lastX + boxWidth, yOffset + boxWidth);
-    drawGame(lls, lastX + boxWidth, yOffset);
-    drawGame(ms, lastX + boxWidth, yOffset);
-    drawGame(eosd, lastX + boxWidth, yOffset);
-    drawGame(eosd_nc, lastX + boxWidth, yOffset);
-    drawGame(stb, 31.7 * boxWidth, yOffset + 0 * boxWidth, true);
-    drawGame(ds, lastX + 2 * boxWidth - 4, yOffset + 0 * boxWidth, true);
-    drawGame(isc, 31.7 * boxWidth, yOffset + 3.7 * boxWidth, true);
-    drawGame(vd, lastX + 1.6 * boxWidth, yOffset + 3.7 * boxWidth, true);
-    drawGame(bm, lastX + 1.4 * boxWidth, yOffset + 3.7 * boxWidth, true);
+    drawGame(gameMap.hrtp, 2, yOffset + boxWidth, true);
+    drawGame(gameMap.soew, lastX + boxWidth, yOffset);
+    drawGame(gameMap.podd, lastX + boxWidth, yOffset + boxWidth);
+    drawGame(gameMap.lls, lastX + boxWidth, yOffset);
+    drawGame(gameMap.ms, lastX + boxWidth, yOffset);
+    drawGame(gameMap.eosd, lastX + boxWidth, yOffset);
+    drawGame(gameMap.eosdNC, lastX + boxWidth, yOffset);
+    drawGame(gameMap.stb, 31.7 * boxWidth, yOffset + 0 * boxWidth, true);
+    drawGame(gameMap.ds, lastX + 2 * boxWidth - 4, yOffset + 0 * boxWidth, true);
+    drawGame(gameMap.isc, 31.7 * boxWidth, yOffset + 3.7 * boxWidth, true);
+    drawGame(gameMap.vd, lastX + 1.6 * boxWidth, yOffset + 3.7 * boxWidth, true);
+    drawGame(gameMap.bm, lastX + 1.4 * boxWidth, yOffset + 3.7 * boxWidth, true);
     if (CONFIG.easyMode.value) {
         yOffset += boxWidth;
     }
@@ -1239,49 +1001,49 @@ function drawScreen() {
     if (CONFIG.easyMode.value) {
         pcvPofvOffset = 1;
     }
-    drawGame(pcb, 2, yOffset + ((pcvPofvOffset + 8) * boxWidth), true);
-    drawGame(imp, lastX + 2 * boxWidth, yOffset + 6 * boxWidth, true);
-    drawGame(pofv, lastX + 2 * boxWidth, yOffset + ((pcvPofvOffset + 9) * boxWidth), true);
+    drawGame(gameMap.pcb, 2, yOffset + ((pcvPofvOffset + 8) * boxWidth), true);
+    drawGame(gameMap.imp, lastX + 2 * boxWidth, yOffset + 6 * boxWidth, true);
+    drawGame(gameMap.pofv, lastX + 2 * boxWidth, yOffset + ((pcvPofvOffset + 9) * boxWidth), true);
     if (CONFIG.easyMode.value) {
         yOffset += 2 * boxWidth;
     }
-    drawGame(mof, 2, yOffset + 15 * boxWidth, true);
-    drawGame(sa, lastX + boxWidth, yOffset + 15 * boxWidth);
-    drawGame(ufo, lastX + boxWidth, yOffset + 15 * boxWidth);
-    drawGame(gfw, lastX + boxWidth, yOffset + 16 * boxWidth);
-    drawGame(td, lastX + 2 * boxWidth, yOffset + 15 * boxWidth, true);
-    drawGame(ddc, lastX + boxWidth, yOffset + 15 * boxWidth);
+    drawGame(gameMap.mof, 2, yOffset + 15 * boxWidth, true);
+    drawGame(gameMap.sa, lastX + boxWidth, yOffset + 15 * boxWidth);
+    drawGame(gameMap.ufo, lastX + boxWidth, yOffset + 15 * boxWidth);
+    drawGame(gameMap.gfw, lastX + boxWidth, yOffset + 16 * boxWidth);
+    drawGame(gameMap.td, lastX + 2 * boxWidth, yOffset + 15 * boxWidth, true);
+    drawGame(gameMap.ddc, lastX + boxWidth, yOffset + 15 * boxWidth);
     if (CONFIG.easyMode.value) {
         yOffset += boxWidth;
     }
-    drawGame(lolk, 2, yOffset + 21 * boxWidth, true);
-    drawGame(hsifs, lastX + 2 * boxWidth, yOffset + 21 * boxWidth, true);
-    drawGame(wbawc, lastX + 2 * boxWidth, yOffset + 21 * boxWidth, true);
-    drawGame(um, lastX + boxWidth, yOffset + 21 * boxWidth);
+    drawGame(gameMap.lolk, 2, yOffset + 21 * boxWidth, true);
+    drawGame(gameMap.hsifs, lastX + 2 * boxWidth, yOffset + 21 * boxWidth, true);
+    drawGame(gameMap.wbawc, lastX + 2 * boxWidth, yOffset + 21 * boxWidth, true);
+    drawGame(gameMap.um, lastX + boxWidth, yOffset + 21 * boxWidth);
     if (CONFIG.easyMode.value) {
         yOffset += boxWidth;
     }
-    drawGame(udoalg, 2, yOffset + 28 * boxWidth, true);
-    drawGame(fw, lastX + 2 * boxWidth, yOffset + 27 * boxWidth, true);
+    drawGame(gameMap.udoalg, 2, yOffset + 28 * boxWidth, true);
+    drawGame(gameMap.fw, lastX + 2 * boxWidth, yOffset + 27 * boxWidth, true);
     if (CONFIG.easyMode.value) {
         yOffset += boxWidth;
     }
     if (CONFIG.showFighting.value) {
         drawExtraHeader(lastX, yOffset + 32.35 * boxWidth);
-        drawGame(iamp, 2, yOffset + 33.71 * boxWidth, true);
-        drawGame(swr, lastX + boxWidth, yOffset + 33.71 * boxWidth);
-        drawGame(hsoku, lastX + boxWidth, yOffset + 33.71 * boxWidth);
-        drawGame(hm, lastX + boxWidth, yOffset + 33.71 * boxWidth);
+        drawGame(gameMap.iamp, 2, yOffset + 33.71 * boxWidth, true);
+        drawGame(gameMap.swr, lastX + boxWidth, yOffset + 33.71 * boxWidth);
+        drawGame(gameMap.hsoku, lastX + boxWidth, yOffset + 33.71 * boxWidth);
+        drawGame(gameMap.hm, lastX + boxWidth, yOffset + 33.71 * boxWidth);
         if (CONFIG.easyMode.value) {
             yOffset += boxWidth;
         }
-        ulil.characters = ulil.characters.filter((char) => char.name !== "RS");
+        gameMap.ulil.characters = gameMap.ulil.characters.filter((char) => char.name !== "RS");
         if (CONFIG.showReisen.value) {
-            ulil.characters.push(new Character("RS", "Reisen"));
+            gameMap.ulil.characters.push(new Character("RS", "Reisen"));
         }
-        drawGame(ulil, 2, yOffset + 39.7 * boxWidth, true);
-        drawGame(aocf, lastX + 2 * boxWidth, yOffset + 38.7 * boxWidth, true);
-        drawGame(gi, lastX + 2 * boxWidth, yOffset + 40.7 * boxWidth, true);
+        drawGame(gameMap.ulil, 2, yOffset + 39.7 * boxWidth, true);
+        drawGame(gameMap.aocf, lastX + 2 * boxWidth, yOffset + 38.7 * boxWidth, true);
+        drawGame(gameMap.gi, lastX + 2 * boxWidth, yOffset + 40.7 * boxWidth, true);
     }
     drawHighlight();
 }
@@ -1407,4 +1169,4 @@ fontMini.load().then(function () {
     });
 });
 
-export {drawScreen, updateCanvasHeight, setCheckboxInState, getCheckboxFromState, showCompletion };
+export { drawScreen, updateCanvasHeight, setCheckboxInState, getCheckboxFromState, showCompletion };
