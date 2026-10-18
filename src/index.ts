@@ -541,43 +541,30 @@ if (ctx) {
             importSaveInput.value = '';
         }
     });
-    canvas.addEventListener('click', function (event) {
-        event.preventDefault();
-        var ClientRect = canvas.getBoundingClientRect();
-        const x = Math.round(event.clientX - ClientRect.left) * SCALE;
-        const y = Math.round(event.clientY - ClientRect.top) * SCALE;
-        let found = false;
-        for (let box of boxes) {
-            if (ctx.isPointInPath(box[0], x, y)) {
-                found = true;
-                selectBox(box);
-                break;
-            }
-        }
-        if (!found) { selectBox(); }
-        return false;
-    });
-    canvas.addEventListener('dblclick', function (event) {
-        event.preventDefault();
-        var ClientRect = canvas.getBoundingClientRect();
-        const x = Math.round(event.clientX - ClientRect.left) * SCALE;
-        const y = Math.round(event.clientY - ClientRect.top) * SCALE;
-        let found = false;
-        for (let box of boxes) {
-            if (ctx.isPointInPath(box[0], x, y)) {
-                found = true;
-                selectBox(box);
+    canvas.addEventListener('click', (event) => { onClick(event); });
+    canvas.addEventListener('dblclick', (event) => { onClick(event, true); });
+    canvas.addEventListener('contextmenu', () => { selectBox(); });
+}
+
+function onClick(event: MouseEvent, isDouble: boolean = false) {
+    event.preventDefault();
+    var ClientRect = canvas.getBoundingClientRect();
+    const x = Math.round(event.clientX - ClientRect.left) * SCALE;
+    const y = Math.round(event.clientY - ClientRect.top) * SCALE;
+    let found = false;
+    for (let box of boxes) {
+        if (ctx!.isPointInPath(box[0], x, y)) {
+            found = true;
+            selectBox(box);
+            if (isDouble) {
                 toggleDone();
                 showCompletion();
-                break;
             }
+            break;
         }
-        if (!found) {
-            selectBox();        
-        }
-        return false;
-    });
-    canvas.addEventListener('contextmenu', () => { selectBox(); });
+    }
+    if (!found) selectBox();
+    return false;
 }
 
 function toggleDone() {
@@ -589,8 +576,10 @@ function toggleDone() {
         drawScreen();
     }
 }
+
 let selectedBox: [Path2D, string, string | null] | null = null;
 
+// figure out a way to change this dynamically
 function updateCanvasHeight() {
     let height = 765;
     if (!CONFIG.showFighting.value && !CONFIG.easyMode.value) {
