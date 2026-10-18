@@ -33,12 +33,27 @@ canvas.onselectstart = function () {
     return false;
 };
 
-function downloadImage() {
-    const link: HTMLAnchorElement = document.createElement('a');
-    link.download = `progress_${timestamp}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-}
+const BOX_CONFIG = {
+    cellColour: new BoxSettings("bgColour", "cellColour"),
+    textColour: new BoxSettings("textColour", "textColour"),
+    done: new BoxSettings("doneCheckbox", "done"),
+    focus: new BoxSettings("focusCheckbox", "focus"),
+    pacifist: new BoxSettings("pacifistCheckbox", "pacifist"),
+    vertical: new BoxSettings("verticalCheckbox", "vertical"),
+    unique: new BoxSettings("uniqueCheckbox", "unique"),
+    lives: new BoxSettings("livesSelect", "lives"),
+    bombs: new BoxSettings("bombsSelect", "bombs"),
+    misses: new BoxSettings("missesSelect", "misses"),
+} satisfies Record<string, BoxSettings>;
+
+const CONFIG = {
+    transparentPng: new Settings("bg", "useBackgroundCheckbox", true),
+    showFighting: new Settings("fighting", "fightingCheckbox", true),
+    easyMode: new Settings("easy", "easyCheckbox", false),
+    showLegend: new Settings("legend", "legendCheckbox", true),
+    showReisen: new Settings("reisen", "reisenCheckbox", false),
+    showCompletions: new Settings("completions", "completionCheckbox", false),
+} satisfies Record<string, Settings>;
 
 const boxWidth = 17;
 function drawBox(x: number, y: number, width = boxWidth, height = boxWidth, lineWidth = 1.0, strokeStyle = 'rgba(128, 128, 128, 1.0)') {
@@ -63,6 +78,9 @@ function drawExtraHeader(x: number, y: number) {
         drawText("EXTRA", 2, y + 8);
     }
 }
+
+// honestly just drawing GFW to have the extra stage on the top is way more intuitive 
+// since otherwise the extra stage is also Normal/Easy just from looking at the grid
 function drawGFWBox(x: number, y: number) {
     if (ctx) {
         ctx.lineCap = 'butt';
@@ -243,7 +261,19 @@ function drawTDUMBox(x: number, y: number) {
         ctx.stroke();
     }
 }
-function drawBoxContentsAux(x: number,
+
+// ideally this should be empty by the time the rewrite is done
+const UNIQUE_BOXES: Record<string, (x: number, y: number) => void> = {
+    LOLK: drawLOLKBox,
+    TD: drawTDUMBox,
+    UM: drawTDUMBox,
+    GFW: drawGFWBox,
+    HSIFS: drawHSIFSBox,
+};
+
+// consider merging into boxes.ts
+function drawBoxContentsAux(
+    x: number,
     y: number,
     done: boolean,
     misses: string | null,
@@ -257,12 +287,8 @@ function drawBoxContentsAux(x: number,
     textColour: string,
     colour: string): void {
     if (ctx) {
-        if (done) {
-            ctx.fillStyle = colour;
-        }
-        else {
-            ctx.fillStyle = cellColour;
-        }
+        ctx.fillStyle = done ? colour : cellColour;
+
         ctx.fillRect(x, y, boxWidth, boxWidth);
         // Draw the little bits and pieces
         // Draw miss/bomb/starting counts
@@ -300,7 +326,6 @@ function drawBoxContents(x: number, y: number, boxName: string, colour: string):
     const box = getBoxFromState([new Path2D(), boxName, null]);
     drawBoxContentsAux(x, y, box.done, box.misses, box.bombs, box.lives, box.vertical, box.focus, box.pacifist, box.unique, box.cellColour, box.textColour, colour);
 }
-
 
 let lastX = 0;
 let lastY = 0;
@@ -351,14 +376,10 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
         }
     }
     // Easy mode toggle need special work
+    // not sure why IN difficulties are set like 3 times but im partially to blame for it so
     let difficulties = game.difficulties.slice();
-    if (CONFIG.easyMode.value) {
-        if (game.name === 'IN') {
-            difficulties = ["X", "B-L", "B-H", "B-N", "B-E", "A-L", "A-H", "A-N", "A-E"];
-        }
-        else if (difficulties[difficulties.length - 1] === 'N') {
-            difficulties.push('E');
-        }
+    if (CONFIG.easyMode.value && difficulties[difficulties.length - 1] === 'N') {
+        difficulties.push('E');
     }
     const height = difficulties.length;
     // Draw difficulties?
@@ -402,18 +423,13 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
             difficulties = ["X", "B-L", "B-H", "B-N", "A-L", "A-H", "A-N"];
         }
     }
-    let dotOffset = 0;
-    if (width == 1) {
-        dotOffset = -6;
-    }
+    let dotOffset = width == 1 ? -6 : 0;
     let dotNameOffset = 3;
     const gap = 4;
     if (game.name === 'GFW' || game.name === 'PODD') {
         dotNameOffset = 4;
     }
-    // Draw game colour dot
     drawDot(game.colour, baseX + dotNameOffset + dotOffset, baseY - 5);
-    // Draw game name
     drawText(game.name, baseX + dotNameOffset + gap + dotOffset, baseY - 2);
     let lastY = 0;
     // Draw individual boxes
@@ -458,34 +474,27 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
         lastX = baseX + (x * boxWidth);
         x++;
     }
-    // Draw outer box, except for annoying games like LOLK, GFW and HSIFS.
-    if (game.name != 'TD' && game.name != 'UM' && game.name !== 'LOLK' && game.name !== 'GFW' && game.name !== 'HSIFS') {
-        drawBox(baseX - 0.5, baseY - 0.5, boxWidth * width, boxWidth * height, 2);
-    }
-    if (game.name === 'LOLK') {
-        drawLOLKBox(baseX - 0.5, baseY - 0.5);
-    }
-    if (game.name === 'TD' || game.name === 'UM') {
-        drawTDUMBox(baseX - 0.5, baseY - 0.5);
-    }
-    if (game.name === 'GFW') {
-        drawGFWBox(baseX - 0.5, baseY - 0.5);
-    }
-    if (game.name === 'HSIFS') {
-        drawHSIFSBox(baseX - 0.5, baseY - 0.5);
+    
+    let customBox = UNIQUE_BOXES[game.name];
+    let boxX = baseX - 0.5;
+    let boxY = baseY - 0.5;
+
+    if (!customBox) {
+        drawBox(boxX, boxY, boxWidth * width, boxWidth * height, 2);
+    } else { 
+        customBox(boxX, boxY);
     }
     // Draw characters
     let charX = 0;
     for (let character of game.characters) {
+        let xAdjust = 0;
+        let yAdjust = 0.5;
         if (character.subcharacters.length > 0) {
             let lineWidth = 1;
-            let xAdjust = 0;
-            let yAdjust = 0.5;
             // If this is the first character, we need a long thick bar at the start..
             if (charX == 0) {
                 lineWidth = 2;
                 xAdjust = -0.5;
-                yAdjust = 0.5;
             }
             drawUILine(xAdjust + (charX * boxWidth) + baseX, yAdjust + lastY + boxWidth, boxWidth - 2, lineWidth);
             drawText(character.name, baseX + (charX * boxWidth) + 2, lastY + (boxWidth) + 14);
@@ -499,7 +508,6 @@ function drawGame(game: Game, baseX: number, baseY: number, drawDifficulties: bo
             // If this is the first chracter, we need a thick short bar at the start, otherwise a thin one
             let lineWidth = 1;
             let xAdjust = 1;
-            let yAdjust = 0.5;
             let textAdjust = 0;
             if (charX == 0) {
                 lineWidth = 2;
@@ -543,14 +551,10 @@ if (ctx) {
             if (ctx.isPointInPath(box[0], x, y)) {
                 found = true;
                 selectBox(box);
-                drawScreen();
                 break;
             }
         }
-        if (!found) {
-            selectBox();
-            drawScreen();
-        }
+        if (!found) { selectBox(); }
         return false;
     });
     canvas.addEventListener('dblclick', function (event) {
@@ -569,39 +573,12 @@ if (ctx) {
             }
         }
         if (!found) {
-            selectBox();
-            drawScreen();
+            selectBox();        
         }
         return false;
     });
-    canvas.addEventListener('contextmenu', function (event) {
-        selectBox();
-        drawScreen();
-    });
+    canvas.addEventListener('contextmenu', () => { selectBox(); });
 }
-
-const BOX_CONFIG = {
-    cellColour: new BoxSettings("bgColour", "cellColour"),
-    textColour: new BoxSettings("textColour", "textColour"),
-    done:       new BoxSettings("doneCheckbox", "done"),
-    focus:      new BoxSettings("focusCheckbox", "focus"),
-    pacifist:   new BoxSettings("pacifistCheckbox", "pacifist"),
-    vertical:   new BoxSettings("verticalCheckbox", "vertical"),
-    unique:     new BoxSettings("uniqueCheckbox", "unique"),
-    lives:      new BoxSettings("livesSelect", "lives"),
-    bombs:      new BoxSettings("bombsSelect", "bombs"),
-    misses:     new BoxSettings("missesSelect", "misses"),
-} satisfies Record<string, BoxSettings>
-
-const CONFIG = {
-    transparentPng:  new Settings("bg", "useBackgroundCheckbox", true),
-    showFighting:    new Settings("fighting", "fightingCheckbox", true),
-    easyMode:        new Settings("easy", "easyCheckbox", false),
-    showLegend:      new Settings("legend", "legendCheckbox", true),
-    showReisen:      new Settings("reisen", "reisenCheckbox", false),
-    showCompletions: new Settings("completions", "completionCheckbox", false),
-} satisfies Record<string, Settings>;
-
 
 function toggleDone() {
     if (selectedBox) {
@@ -635,6 +612,18 @@ function updateCanvasHeight() {
     drawScreen();
 }
 
+async function getCompletions() {
+    var counter = 0;
+    var enabledLevels = boxes.map(lvlName => { return lvlName[1]; });
+
+    for (let level of state) {
+        if (!enabledLevels.includes(level[0])) { continue; }
+        counter += Number(level[1].done);
+    }
+
+    return { completed: counter, total: enabledLevels.length, percentage: (counter / enabledLevels.length * 100).toFixed(2) };
+}
+
 async function showCompletion() {
     if (CONFIG.showCompletions.value) {
         completionDiv.style.display = 'block';
@@ -647,8 +636,8 @@ async function showCompletion() {
 
 // really should make a box interface this is not good
 function selectBox(box: [Path2D, string, string | null] | null = null) {
+    selectedBox = box;
     if (box) {
-        selectedBox = box;
         debugDiv!.innerHTML = `${box[1]} (${box[2]})`;
         const boxObject = getBoxFromState(box!);
         for (const control of Object.values(BOX_CONFIG)) {
@@ -659,6 +648,7 @@ function selectBox(box: [Path2D, string, string | null] | null = null) {
         debugDiv!.innerHTML = '(Double-)Click a square!';
         for (const control of Object.values(BOX_CONFIG)) control.setEnabled(false);
     }
+    drawScreen(); // maybe duplication isnt all bad. this is kinda easy to forget
 }
 
 function drawHighlight() {
@@ -853,6 +843,7 @@ function getBoxFromState(box: [Path2D, string, string | null]): BoxState {
     }
 }
 
+// could probably be simplified, into non-existance
 function getCheckboxFromState(checkboxName: string) {
     if (checkboxState.has(checkboxName)) {
         return checkboxState.get(checkboxName)!;
@@ -860,21 +851,6 @@ function getCheckboxFromState(checkboxName: string) {
     else {
         return null;
     }
-}
-
-async function getCompletions() {
-    var counter = 0;
-
-    var enabledLevels = boxes.map(lvlName => { return lvlName[1]; });
-
-    for (let level of state) {
-        if (!enabledLevels.includes(level[0])) {
-            continue;
-        }
-        counter += Number(level[1].done);
-    }
-
-    return { completed: counter, total: enabledLevels.length, percentage: (counter / enabledLevels.length * 100).toFixed(2) };
 }
 
 function setCheckboxInState(checkboxName: string, checkboxValue: boolean) {
@@ -894,6 +870,13 @@ function loadState() {
     if (window.localStorage.getItem('checkboxState')) {
         checkboxState = new Map(JSON.parse(window.localStorage.getItem('checkboxState')!)!);
     }
+}
+
+function downloadImage() {
+    const link: HTMLAnchorElement = document.createElement('a');
+    link.download = `progress_${timestamp}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
 }
 
 async function exportSaveFile() {
@@ -928,9 +911,7 @@ async function exportSaveFile() {
 };
 
 async function importSaveFile(file: File | undefined) {
-    if (!file) {
-        return;
-    }
+    if (!file) { return; }
 
     const decompressedStream = file.stream().pipeThrough(new DecompressionStream('gzip'));
     const jsonString = await new Response(decompressedStream).text();
@@ -960,12 +941,11 @@ fontMini.load().then(function () {
     });
 });
 
-export { 
-    drawScreen, 
-    updateCanvasHeight, 
-    setCheckboxInState, 
-    getCheckboxFromState, 
-    showCompletion, 
+export {
+    drawScreen,
+    updateCanvasHeight,
+    setCheckboxInState,
+    showCompletion,
     setBoxInState,
     getBoxFromState,
     selectedBox,
